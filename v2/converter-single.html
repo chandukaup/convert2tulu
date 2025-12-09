@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convert to Tulu</title>
+    <meta name="description" content="Convert to Tulu">
+    <meta name="author" content="Chandrahasa">
+    <link rel="stylesheet" href="/css/common.css?v=1.01">
+</head>
+<body>
+    <!-- Header -->
+    <div id="header"></div>
+
+    <div class="container">
+
+        <!-- Info -->
+        <div id="info"></div>
+
+        <div class="single-section-header">
+            <div class="section-title">
+                <span></span>
+            </div>
+            <div class="section-actions">
+                <button class="section-btn" onclick="applySpecialChar()" data-title="Apply special character conversion">✨</button>
+                <button class="section-btn" onclick="clearAll()" data-title="Clear all text">🗑️</button>
+            </div>
+        </div>
+
+        <!-- Kannada section is hidden -->
+        <div class="kannada-section" id="kannadaSection" style="display: none;">
+            <textarea id="kannadaInput" class="text-area small" placeholder="Type in Kannada using Google Input Tools..."></textarea>
+        </div>
+
+        <div class="tulu-section">
+            <textarea id="tuluOutput" class="text-area large" placeholder="Start typing in Kannada.."></textarea>
+        </div>
+
+        <div id="action-button-section"></div>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer"></div>
+
+    <script>
+        const APP_VERSION = "1.01";
+    </script>
+      
+    <!-- js for components -->
+    <script src="/js/components.js?v=" + APP_VERSION></script>
+    <script>
+        document.getElementById('header').innerHTML = renderHeader();
+        document.getElementById('info').innerHTML = renderInfo();
+        document.getElementById('footer').innerHTML = renderFooter();
+        document.getElementById('action-button-section').innerHTML = renderButtonActions();
+    </script>
+    
+    <!-- js for tulusri font -->
+    <script type="text/javascript" src="/js/tulusri/mapping.js?v=" + APP_VERSION charset="utf-8"></script>
+    <script type="text/javascript" src="/js/tulusri/converter.js?v=" + APP_VERSION charset="utf-8"></script>
+
+    <!-- js for baravu fonts -->
+    <script type="text/javascript" src="/js/baravu/mapping.js?v=" + APP_VERSION charset="utf-8"></script>
+    <script type="text/javascript" src="/js/baravu/converter.js?v=" + APP_VERSION charset="utf-8"></script>
+
+    <!-- js for application -->
+    <script type="text/javascript" src="/js/common.js?v=" + APP_VERSION charset="utf-8"></script>
+    <script type="text/javascript" src="/js/appConverterSingle.js?v=" + APP_VERSION charset="utf-8"></script>
+
+    <!-- for download image -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+</body>
+</html>

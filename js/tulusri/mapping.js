@@ -4,7 +4,7 @@
         - Malayalam Mapping: https://unicode.org/charts/PDF/U0D00.pdf 
  */
 
-const k_m_signs_mapping = {
+const KM_SIGNS_MAPPING = {
     'ಀ': '',
     'ಁ': 'ഁ',
     'ಂ': 'ം',
@@ -13,7 +13,7 @@ const k_m_signs_mapping = {
     'ಽ': 'ഽ'
 };
 
-const k_m_independent_vowels_mapping = {
+const KM_INDEPENDENT_VOWELS_MAPPING = {
     'ಅ': 'അ',
     'ಆ': 'ആ',
     'ಇ': 'ഇ',
@@ -30,7 +30,7 @@ const k_m_independent_vowels_mapping = {
     'ಔ': 'ഔ'
 };
 
-const k_m_consonants_mapping = {
+const KM_CONSONANTS_MAPPING = {
     'ಕ': 'ക',
     'ಖ': 'ഖ',
     'ಗ': 'ഗ',
@@ -68,7 +68,7 @@ const k_m_consonants_mapping = {
     'ಹ': 'ഹ'
 };
 
-const k_m_dependent_vowel_signs_mapping = {
+const KM_DEPENDENT_VOWEL_SIGNS_MAPPING = {
     'ಾ': 'ാ',
     'ಿ': 'ി',
     'ೀ': 'ീ',
@@ -84,25 +84,25 @@ const k_m_dependent_vowel_signs_mapping = {
     'ೌ': 'ൌ'
 };
 
-const k_m_virama_mapping = {
+const KM_VIRAMA_MAPPING = {
     '್': '്'
 };
 
-const k_m_additional_vowels_mapping = {
+const KM_ADDITIONAL_VOWELS_MAPPING = {
     'ೠ': 'ൠ',
     'ೡ': 'ൡ'
 };
 
-const k_m_dependent_vowels_mapping = {
+const KM_DEPENDENT_VOWELS_MAPPING = {
     'ೢ': 'ൢ',
     'ೣ': 'ൣ'
 };
 
-const k_m_chillu_latters_mapping = {
+const KM_CHILLU_LATTERS_MAPPING = {
     'ರ': 'ർ'
 }
 
-const k_m_digits_mapping = {
+const KM_DIGITS_MAPPING = {
     '೦': '൦',
     '೧': '൧',
     '೨': '൨',
@@ -115,17 +115,17 @@ const k_m_digits_mapping = {
     '೯': '൯'
 };
 
-const k_m_mapping = {
-    ...k_m_signs_mapping,
-    ...k_m_independent_vowels_mapping,
-    ...k_m_consonants_mapping,
-    ...k_m_dependent_vowel_signs_mapping,
-    ...k_m_virama_mapping,
-    ...k_m_additional_vowels_mapping,
-    ...k_m_dependent_vowels_mapping,
-    ...k_m_digits_mapping
+const KM_MAPPING = {
+    ...KM_SIGNS_MAPPING,
+    ...KM_INDEPENDENT_VOWELS_MAPPING,
+    ...KM_CONSONANTS_MAPPING,
+    ...KM_DEPENDENT_VOWEL_SIGNS_MAPPING,
+    ...KM_VIRAMA_MAPPING,
+    ...KM_ADDITIONAL_VOWELS_MAPPING,
+    ...KM_DEPENDENT_VOWELS_MAPPING,
+    ...KM_DIGITS_MAPPING
 }
 
 const mapping = {
-    ...k_m_mapping
+    ...KM_MAPPING
 }
