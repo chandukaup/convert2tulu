@@ -229,7 +229,21 @@ function applyPreVowel(cluster, ascii) {
     // 4. Merge everything
     return applied + leftover;
 }
-    
+
+function applySplitter() {
+    const cursorPos = textArea.selectionStart;
+    const currentText = textArea.value;
+
+    if (cursorPos === 0 || currentText[cursorPos - 1] === ' ') {
+        alert('Please place cursor after a character to convert');
+        return;
+    }
+
+    const newText = currentText.trim() + 'X';
+    textArea.value = newText;
+    showToast(`✓ Applied splitter`);
+}
+
 /** Special character handling; note: tulusri font doesn't support this yet */
 function applySpecialChar() {
     const cursorPos = textArea.selectionStart;
