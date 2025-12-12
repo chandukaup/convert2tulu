@@ -27,12 +27,12 @@ function convertKannadaToASCII(text) {
 function handleSpecialCharacterMarkers(txt) {
   const MARKER = '\u200D'; // Zero-Width Joiner (invisible)
   
-  const kannadaConsonants = "ಕಖಗಘಙಚಛಜಝಞಟಠಡಢಣತಥದಧನಪಫಬಭಮಯರಲವಶಷಸಹಳೞಱ";
-  const baseDiacritics = "ಾಿೀುೂೃೆೇೊೋೌ";
-  const halantChars = "್ä";
+  const consonantChars = KB_CHARACTER_SETS.consonants;
+  const vowelSigns = KB_CHARACTER_SETS.vowelSigns;
+  const viramaMarkers = KB_CHARACTER_SETS.viramaMarkers;
   
   // Build cluster pattern
-  const clusterPattern = `(?:[${kannadaConsonants}](?:[${baseDiacritics}])?)(?:[${halantChars}][${kannadaConsonants}])*`;
+  const clusterPattern = `(?:[${consonantChars}](?:[${vowelSigns}])?)(?:[${viramaMarkers}][${consonantChars}])*`;
   
   // Special standalone vowels with marker
   txt = txt.replace(new RegExp(`ಎ${MARKER}`, 'g'), "oA");
@@ -41,6 +41,7 @@ function handleSpecialCharacterMarkers(txt) {
   
   // Special vowel signs with marker
   txt = txt.replace(new RegExp(`ು${MARKER}`, 'g'), "uAX");
+  txt = txt.replace(new RegExp(`ುಂ${MARKER}`, 'g'), "uAXM");
   
   // Special cases: vowel sign with marker after consonant cluster
   // Pattern: cluster + vowel + marker → prefix + cluster
@@ -49,7 +50,7 @@ function handleSpecialCharacterMarkers(txt) {
   
   // Clean up any remaining markers (in case they weren't handled)
   txt = txt.replace(new RegExp(MARKER, 'g'), '');
-  
+
   return txt;
 }
 
@@ -61,13 +62,13 @@ function preprocessText(text) {
     for (const [kannada, ascii] of Object.entries(KB_PREDEFINED_PHRASES)) {
       text = text.replace(new RegExp(kannada, 'g'), ascii);
     }
-    
+
     // Normalize virama markers
     text = text.replace(/್‍/g, 'ä');
-    
+
     // Remove zero-width joiners that aren't needed
     text = text.replace(/‍/g, '');
-    
+
     return text;
 }
 
@@ -102,7 +103,7 @@ function repositionPrePositionedVowels(text) {
         text = text.replace(pattern, `${prefix}$1`);
       }
     }
-    
+
     return text;
 }
 
@@ -120,7 +121,7 @@ function processConsonantClusters(text) {
     
     // Convert standalone ರ್ (ra with virama, no following consonant)
     text = text.replace(/ರ್/g, 'rA');
-    
+
     return text;
 }
 
@@ -143,7 +144,7 @@ function convertCharacters(text) {
     for (const [kannada, ascii] of Object.entries(allMappings)) {
       result = result.replace(new RegExp(escapeRegex(kannada), 'g'), ascii);
     }
-    
+
     return result;
 }
 
@@ -161,7 +162,7 @@ function postProcess(text) {
     
     // Normalize multiple 'e' repetitions (ee+ → ee)
     text = text.replace(/ee+/g, 'ee');
-    
+
     return text;
 }
   
