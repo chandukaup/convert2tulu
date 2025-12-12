@@ -2,6 +2,9 @@ const kannadaInput = document.getElementById('kannadaInput');
 const tuluOutput = document.getElementById('tuluOutput');
 const kannadaSection = document.getElementById('kannadaSection');
 
+const ZWNJ_MARKER = '\u200C'; // Zero-Width Non-Joiner
+const ZWJ_MARKER = '\u200D'; // Zero-Width Joiner
+
 let isComposing = false;
 
 // Track composition (for Gboard)
@@ -38,9 +41,19 @@ function convertAndDisplay() {
     tuluOutput.value = tuluText;
 }
 
-// Special character handling
+function applySplitter() {
+    applySpecialCharacters(ZWNJ_MARKER);
+    showToast(`✓ Applied splitter`);
+}
+
 function applySpecialChar() {
-    const MARKER = '\u200D'; // Zero-Width Joiner
+    applySpecialCharacters(ZWJ_MARKER);
+    showToast(`✓ Applied special character handling`);
+}
+
+
+// Special character handling
+function applySpecialCharacters(marker) {
     
     // Check font type
     if (window.currentFontType !== "baravu-fonts") {
@@ -70,7 +83,7 @@ function applySpecialChar() {
     const before = kannadaInput.value.slice(0, kannadaCursorPos);
     const after = kannadaInput.value.slice(kannadaCursorPos);
 
-    kannadaInput.value = before + MARKER + after;
+    kannadaInput.value = before + marker + after;
     
     // Move cursor after marker
     kannadaInput.setSelectionRange(kannadaCursorPos + 1, kannadaCursorPos + 1);
@@ -83,7 +96,5 @@ function applySpecialChar() {
             kannadaSection.style.display = 'none';
             tuluOutput.focus();
         }, 500);
-    }
-    
-    showToast(`✓ Applied special character handling`);
+    }    
 }
