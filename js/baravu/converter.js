@@ -152,7 +152,7 @@ function convertCharacters(text) {
  * Post-processing to fix edge cases and cleanup
  */
 function postProcess(text) {
-    // Fix: subscript 'ra' before a consonant with halant needs spacing
+    // Fix: subscript 'ra' before a consonant with halant/Virama needs spacing
     // Pattern: fA + consonant → fXA + consonant
     const consonantPattern = '[kKgGZcCjJzqQwWNtTdDnpPbBmyrlvSxshL]';
     text = text.replace(

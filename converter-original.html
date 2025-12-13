@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Convert to Tulu</title>
+    <meta name="description" content="Convert to Tulu">
+    <meta name="author" content="Chandrahasa">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css?v=1.02">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row center white-text">
+            <h3> Convert to Tulu </h3>
+            <span>
+                <button onclick="window.location.href='/'" class="btn waves-effect waves-light blue lighten-2 modal-trigger">
+                    <span class="valign-wrapper">
+                        <i class="material-icons">home</i>Home
+                    </span>
+                </button>
+            </span>
+            <span>
+                <a class="btn waves-effect waves-light blue lighten-2" target="_blank"
+                    href="https://github.com/chandukaup/convert2tulu">
+                    <span class="valign-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="20" class="mr-2">
+                            <path fill="#343a40"
+                                d="M256 32C132.3 32 32 134.9 32 261.7c0 101.5 64.2 187.5 153.2 217.9 1.4.3 2.6.4 3.8.4 8.3 0 11.5-6.1 11.5-11.4 0-5.5-.2-19.9-.3-39.1-8.4 1.9-15.9 2.7-22.6 2.7-43.1 0-52.9-33.5-52.9-33.5-10.2-26.5-24.9-33.6-24.9-33.6-19.5-13.7-.1-14.1 1.4-14.1h.1c22.5 2 34.3 23.8 34.3 23.8 11.2 19.6 26.2 25.1 39.6 25.1 10.5 0 20-3.4 25.6-6 2-14.8 7.8-24.9 14.2-30.7-49.7-5.8-102-25.5-102-113.5 0-25.1 8.7-45.6 23-61.6-2.3-5.8-10-29.2 2.2-60.8 0 0 1.6-.5 5-.5 8.1 0 26.4 3.1 56.6 24.1 17.9-5.1 37-7.6 56.1-7.7 19 .1 38.2 2.6 56.1 7.7 30.2-21 48.5-24.1 56.6-24.1 3.4 0 5 .5 5 .5 12.2 31.6 4.5 55 2.2 60.8 14.3 16.1 23 36.6 23 61.6 0 88.2-52.4 107.6-102.3 113.3 8 7.1 15.2 21.1 15.2 42.5 0 30.7-.3 55.5-.3 63 0 5.4 3.1 11.5 11.4 11.5 1.2 0 2.6-.1 4-.4C415.9 449.2 480 363.1 480 261.7 480 134.9 379.7 32 256 32z">
+                            </path>
+                        </svg>
+                        View on GitHub
+                    </span>
+                </a>
+            </span>
+            <span>
+                <button data-target="helpModal" class="btn waves-effect waves-light blue lighten-2 modal-trigger">
+                    <span class="valign-wrapper">
+                        <i class="material-icons">help</i>Help
+                    </span>
+                </button>
+                <!-- Help Instructions -->
+                <div id="helpModal" class="modal modal-fixed-footer black-text">
+                    <div class="modal-content">
+                        <h4>Instructions</h4>
+                        <ul class="collection" style="text-align:left;">
+                            <li class="collection-item">
+                                <h6 style="font-weight: bold;">Writing In Kannada</h6>
+                                <p>Easiest way is to download and install <a href="https://www.google.com/inputtools/chrome/" target="_blank">Google Input Tool chrome extension</a>  or
+                                    if using mobile, use Gboard - the Google Keyboard.
+                                    To display both in Kannada and Tulu script, use # like below:
+                                    <blockquote>
+                                        ನಮಸ್ಕಾರ #ನಮಸ್ಕಾರ#
+                                    </blockquote>
+                                </p>
+                            </li>
+                            <li class="collection-item">
+                                <h6 style="font-weight: bold;">Customizing Text</h6>
+                                <p>The text can be customized by pressing the settings (<i class="tiny material-icons">settings</i>) icon. You can change the
+                                    font color, font size, outline color, weight. Also, you can change
+                                    background color or upload your own background image.</p>
+                            </li>
+                            <li class="collection-item">
+                                <h6 style="font-weight: bold;">Downloading Image</h6>
+                                <p>Once you have finished writing, click on <span class="btn-small blue">Download</span> button to download the
+                                    content as image.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </span>
+        </div>
+        <div class="row">
+            <div class="col s12 l7">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="tuluTxtContainer">
+                            <div id="tuluTxt" class="tuluTxt"></div>
+                            <div class="watermark right"> Visit: https://convert2tulu.netlify.app :) </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 l5">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="row">
+                            <textarea id="originalTxt" class="originalTxt" rows="20" cols="5"
+                                placeholder="Write in Kannada or paste Kannada text here!" autofocus data-hj-allow></textarea>
+                        </div>
+                        <div class="row">
+                            <a class="btn-small waves-effect waves-light blue left download" id="download">
+                                <i class="material-icons">cloud_download</i>
+                                <span>Download</span>
+                            </a>
+                            <a class="btn-small waves-effect waves-light blue right settings" id="settings">
+                                <i class="material-icons">settings</i>
+                            </a>
+                        </div>
+                        <div class="row">
+                            <ul class="collapsible">
+                                <li>
+                                    <div class="row collapsible-body">
+                                        <div class="row col s12">
+                                            <div class="col s2">
+                                                <label>
+                                                    <i class="material-icons">format_color_text</i>
+                                                </label>
+                                            </div>
+                                            <div class="col s4">
+                                                <input class="form-control" type="color"
+                                                    value="${options[index].fillColor}" id="fontColor"
+                                                    title="Font Color"></input>
+                                            </div>
+                                            <div class="col s4">
+                                                <input class="form-control" type="color"
+                                                    value="${options[index].shadowColor}" id="shadowColor"
+                                                    title="Shadow Color"></input>
+                                            </div>
+                                        </div>
+                                        <div class="row col s12">
+                                            <div class="col s2">
+                                                <label>
+                                                    <i class="material-icons">format_size</i>
+                                                </label>
+                                            </div>
+                                            <div class="col s7 range-field">
+                                                <input id="fontSize" type="range" min="0" max="200" value="15"
+                                                    step="2"></input>
+                                            </div>
+                                            <div class="col s3">
+                                                <label>
+                                                    <input id="fontWeight" type="checkbox" class="filled-in"></input>
+                                                    <span><i class="material-icons">format_bold</i></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="row col s12">
+                                            <div class="col s2">
+                                                <label>
+                                                    <i class="material-icons">format_color_fill</i>
+                                                </label>
+                                            </div>
+                                            <div class="col s3">
+                                                <input class="form-control" type="color"
+                                                    value="${options[index].fillColor}" id="backgroundColor"
+                                                    title="Background Color">
+                                            </div>
+                                            <div class="col s2">
+                                                <label>OR</label>
+                                            </div>
+                                            <div class="col s4 file-field">
+                                                <a class="btn-small waves-effect waves-light blue" id="upload">
+                                                    <i class="material-icons">cloud_upload</i>
+                                                    <span>Upload</span>
+                                                    <input type="file" id="fileInput" style="width:100%">
+                                                </a>
+                                                <input class="file-path validate" type="hidden">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row white-text container">
+            <blockquote>The tool converts Kannada script to Malayalam and uses <a
+                    href="https://www.thetulufont.in/" target="_blank"><span class="red-text text-darken-2" style="font-weight: bold;">TULU SRI</span></a> font to display
+                the text as Tulu script. 
+                <br/> Latest Update - Upgraded to Tulu Sri font 20.20
+            </blockquote>
+        </div>
+        <div class="row white-text container">
+            <code>©2025 For any query you can contact me at <a href="https://twitter.com/chandukaup" target="_blank"><span class="red-text text-darken-2" style="font-weight: bold;">@chandukaup</span></a> on Twitter. This software is released under MIT license.</code>
+        </div>
+    </div>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+        charset="utf-8"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"
+        charset="utf-8"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"
+        charset="utf-8"></script>
+
+    <script type="text/javascript" src="/js/tulusri/mapping.js?v=1.02" charset="utf-8"></script>
+    <script type="text/javascript" src="/js/tulusri/converter.js?v=1.02" charset="utf-8"></script>
+    <script type="text/javascript" src="/js/app.js?v=1.02" charset="utf-8"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.collapsible').collapsible();
+            $('select').formSelect();
+            $('.modal').modal();
+        });
+    </script>
+</body>
+
+</html>

@@ -11,6 +11,11 @@ function renderHeader() {
     return `
         <div class="header">
             <h1>Convert to Tulu</h1>
+            <button class="header-btn">
+                <a href="/" class="header-btn1" rel="noopener">
+                    🏡 Home
+                </a>
+            </button>
             <div class="header-actions">
                 <a href="https://github.com/chandukaup/convert2tulu" class="header-btn" target="_blank" rel="noopener">
                     ⭐ GitHub
@@ -30,12 +35,23 @@ function renderFooter() {
     return `
         <div class="footer">
             <p>© 2025 Convert to Tulu· For any query you can contact me at
-                <a href="https://twitter.com/chandukaup" target="_blank">
+                <a href="https://twitter.com/chandukaup" target="_blank" rel="noopener">
                     <span class="red-text text-darken-2" style="font-weight: bold;">@chandukaup</span>
                 </a> on Twitter.
-                <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a> · 
-                <a href="https://github.com/chandukaup/convert2tulu" target="_blank">GitHub</a>
-             </p>
+                <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT License</a> · 
+                <a href="https://github.com/chandukaup/convert2tulu" target="_blank" rel="noopener">GitHub</a>
+            </p>
+            <br>
+            <small>
+                Font credits based on the sources used. Please refer to the font provider's 
+                website for licensing details.
+            </small>
+            <br>
+            <br>
+            <p>
+                Baravu Fonts : Credits - <a href="https://www.jaitulunad.in/"  target="_blank" rel="noopener"> Jai Tulunad </a> <br/>
+                Tulusri Font : Credits - <a href="https://www.thetulufont.in/"  target="_blank" rel="noopener"/> The Tulu Font </a>
+            </p>
         </div>
     `;
 }

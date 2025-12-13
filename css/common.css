@@ -111,6 +111,12 @@ body {
     transform: translateY(-1px);
 }
 
+.header-btn a {
+    text-decoration: none;  
+    color: inherit;         
+    cursor: pointer;       
+}
+
 /* Main Container */
 .container {
     flex: 1;
@@ -119,6 +125,139 @@ body {
     margin: 0 auto;
     padding: 30px;
 }
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 20px 20px;
+    margin-bottom: 10px;
+}
+
+.hero h2 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--accent-color) 0%, #2196F3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero p {
+    font-size: 20px;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-btn {
+    padding: 15px 40px;
+    font-size: 18px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+.hero-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+}
+
+/* Main Section Title */
+.main-section-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 40px;
+    color: var(--text-primary);
+}
+
+/* Converter Cards */
+.converter-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-bottom: 80px;
+}
+
+.card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 40px 30px;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border-color: var(--accent-color);
+}
+
+.card.recommended::before {
+    content: "⭐ Recommended";
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-color);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.card-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.card-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+}
+
+.card-description {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 25px;
+    flex: 1;
+}
+
+.card-btn {
+    padding: 12px 30px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+}
+
+.card-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
 
 /* Collapsible Section */
 .collapsible-section {
@@ -476,6 +615,25 @@ body {
     .styling-grid {
         grid-template-columns: 1fr;
     }
+
+            .hero h2 {
+                font-size: 32px;
+            }
+            
+            .hero p {
+                font-size: 16px;
+            }
+            
+            .converter-cards,
+            .steps,
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card {
+                padding: 30px 20px;
+            }
+
 }
 
 .action-buttons-row {
