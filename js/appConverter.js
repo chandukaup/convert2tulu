@@ -46,6 +46,38 @@ function applySplitter() {
     showToast(`✓ Applied splitter`);
 }
 
+/**
+ * 
+ * Fix to missing anuswara in the Kannada input.
+ * Sometimes, Google Input tool doesn't render Kannada text with
+ * anuswara properly. This is a fix for that.
+ * e.g., it renders ಬುಲಿಪುನ್ಡು instead of ಬುಲಿಪುಂಡು
+ * So, this is a work around to replace 'ನ್' with 'ಂ'
+ * 
+ */
+function applyMissingAnuswara() {
+    
+    const kannadaCursorPos = kannadaInput.selectionStart;    
+    if (kannadaCursorPos === 0) {
+        alert('Please place cursor after the character you want to convert');
+        return;
+    }
+    
+    // replace 'ನ್' with answara 
+    const before = kannadaInput.value.slice(0, kannadaCursorPos);
+    const after = kannadaInput.value.slice(kannadaCursorPos);
+
+    // kannadaInput.value = before + marker + after;
+    kannadaInput.value = before + after.replace('ನ್', 'ಂ');
+    
+    // Move cursor after marker
+    kannadaInput.setSelectionRange(kannadaCursorPos + 1, kannadaCursorPos + 1);
+    
+    // reconvert the text
+    convertAndDisplay();
+    showToast(`✓ Applied missing anuswara`);
+}
+
 function applySpecialChar() {
     applySpecialCharacters(ZWJ_MARKER);
     showToast(`✓ Applied special character handling`);
