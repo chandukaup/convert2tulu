@@ -56,26 +56,34 @@ function applySplitter() {
  * 
  */
 function applyMissingAnuswara() {
-    
     const kannadaCursorPos = kannadaInput.selectionStart;    
     if (kannadaCursorPos === 0) {
         alert('Please place cursor after the character you want to convert');
         return;
     }
     
-    // replace 'ನ್' with answara 
     const before = kannadaInput.value.slice(0, kannadaCursorPos);
     const after = kannadaInput.value.slice(kannadaCursorPos);
 
-    // kannadaInput.value = before + marker + after;
-    kannadaInput.value = before + after.replace('ನ್', 'ಂ');
+    let newAfter;
     
-    // Move cursor after marker
+    // Check if 'ನ್' exists in the text after cursor
+    if (after.includes('ನ್')) {
+        // Replace first occurrence of 'ನ್' with 'ಂ'
+        newAfter = after.replace('ನ್', 'ಂ');
+    } else {
+        // Append 'ಂ' at cursor position
+        newAfter = 'ಂ' + after;
+    }
+    
+    kannadaInput.value = before + newAfter;
+    
+    // Move cursor after the anuswara (same for both cases)
     kannadaInput.setSelectionRange(kannadaCursorPos + 1, kannadaCursorPos + 1);
     
-    // reconvert the text
+    // Reconvert the text
     convertAndDisplay();
-    showToast(`✓ Applied missing anuswara`);
+    showToast(`✓ Applied anuswara`);
 }
 
 function applySpecialChar() {
