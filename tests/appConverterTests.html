@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tests - appConverter.js</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #e0e0e0;
+        }
+        #output {
+            white-space: pre-wrap;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Results</h1>
+    <div id="output">Running tests...</div>
+    
+    <!-- The javascript file under test -->
+    <script src="/js/appConverter.js"></script>
+    
+    <!-- The javascript file with tests -->
+    <script src="appConverterTests.js"></script>
+    
+    <script>
+        // Capture console.log and display on page
+        const output = document.getElementById('output');
+        const originalLog = console.log;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            output.textContent += args.join(' ') + '\n';
+        };
+        
+        // Run tests after page loads
+        window.addEventListener('load', () => {
+            output.textContent = '';
+            runAllTests();
+        });
+    </script>
+</body>
+</html>

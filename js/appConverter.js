@@ -1,33 +1,36 @@
-const kannadaInput = document.getElementById('kannadaInput');
-const tuluOutput = document.getElementById('tuluOutput');
-const kannadaSection = document.getElementById('kannadaSection');
+let kannadaInput = document.getElementById('kannadaInput');
+let tuluOutput = document.getElementById('tuluOutput');
+let kannadaSection = document.getElementById('kannadaSection');
 
 const ZWNJ_MARKER = '\u200C'; // Zero-Width Non-Joiner
 const ZWJ_MARKER = '\u200D'; // Zero-Width Joiner
 
 let isComposing = false;
 
-// Track composition (for Gboard)
-kannadaInput.addEventListener('compositionstart', function() {
-    isComposing = true;
-});
+if (typeof kannadaInput !== 'undefined' && kannadaInput) {
+    // Track composition (for Gboard)
+    kannadaInput.addEventListener('compositionstart', function() {
+        isComposing = true;
+    });
 
-kannadaInput.addEventListener('compositionend', function() {
-    isComposing = false;
-    setTimeout(() => {
+    kannadaInput.addEventListener('compositionend', function() {
+        isComposing = false;
+        setTimeout(() => {
+            convertAndDisplay();
+        }, 50);
+    });
+
+    // convert on input
+    kannadaInput.addEventListener('input', function() {
+        if (isComposing) return;
         convertAndDisplay();
-    }, 50);
-});
-
-// convert on input
-kannadaInput.addEventListener('input', function() {
-    if (isComposing) return;
-    convertAndDisplay();
-});
+    });
+}
 
 // main conversion function
 function convertAndDisplay() {
-    const kannadaText = kannadaInput.value;
+    const input = window.kannadaInput || kannadaInput;
+    const kannadaText = input.value;
 
     let tuluText = '';
     if (isTulusriFont()) {
@@ -56,30 +59,35 @@ function applySplitter() {
  * 
  */
 function applyMissingAnuswara() {
-    const kannadaCursorPos = kannadaInput.selectionStart;    
+    const input = window.kannadaInput || kannadaInput;
+    const kannadaCursorPos = input.selectionStart;    
     if (kannadaCursorPos === 0) {
         alert('Please place cursor after the character you want to convert');
         return;
     }
     
-    const before = kannadaInput.value.slice(0, kannadaCursorPos);
-    const after = kannadaInput.value.slice(kannadaCursorPos);
+    const before = input.value.slice(0, kannadaCursorPos);
+    const after = input.value.slice(kannadaCursorPos);
 
     let newAfter;
     
-    // Check if 'ನ್' exists in the text after cursor
-    if (after.includes('ನ್')) {
-        // Replace first occurrence of 'ನ್' with 'ಂ'
-        newAfter = after.replace('ನ್', 'ಂ');
+    const nextSpaceIndex = after.indexOf(' ');
+    const currentWordEnd = nextSpaceIndex === -1 ? after.length : nextSpaceIndex;
+    const currentWordAfterCursor = after.substring(0, currentWordEnd);
+
+    if (currentWordAfterCursor.includes('ನ್')) {
+        // Replace 'ನ್' only within current word
+        const replacedWord = currentWordAfterCursor.replace('ನ್', 'ಂ');
+        newAfter = replacedWord + after.substring(currentWordEnd);
     } else {
-        // Append 'ಂ' at cursor position
+        // No 'ನ್' in current word, insert 'ಂ' at cursor
         newAfter = 'ಂ' + after;
     }
     
-    kannadaInput.value = before + newAfter;
+    input.value = before + newAfter;
     
     // Move cursor after the anuswara (same for both cases)
-    kannadaInput.setSelectionRange(kannadaCursorPos + 1, kannadaCursorPos + 1);
+    input.setSelectionRange(kannadaCursorPos + 1, kannadaCursorPos + 1);
     
     // Reconvert the text
     convertAndDisplay();
@@ -101,18 +109,20 @@ function applySpecialCharacters(marker) {
         return;
     }
 
+    const input = window.kannadaInput || kannadaInput;
+
     // if kannada text is hidden, display it
     const wasHidden = kannadaSection.style.display === 'none';
     if (wasHidden) {
         kannadaSection.style.display = 'block';
         setTimeout(() => {
             alert('Place cursor in the Kannada text after the character you want to convert, then click ✨ again');
-            kannadaInput.focus();
+            input.focus();
         }, 100);
         return;
     }
     
-    const kannadaCursorPos = kannadaInput.selectionStart;
+    const kannadaCursorPos = input.selectionStart;
     
     if (kannadaCursorPos === 0) {
         alert('Please place cursor after the character you want to convert');
@@ -120,13 +130,13 @@ function applySpecialCharacters(marker) {
     }
     
     // insert invisible marker
-    const before = kannadaInput.value.slice(0, kannadaCursorPos);
-    const after = kannadaInput.value.slice(kannadaCursorPos);
+    const before = input.value.slice(0, kannadaCursorPos);
+    const after = input.value.slice(kannadaCursorPos);
 
-    kannadaInput.value = before + marker + after;
+    input.value = before + marker + after;
     
     // Move cursor after marker
-    kannadaInput.setSelectionRange(kannadaCursorPos + 1, kannadaCursorPos + 1);
+    input.setSelectionRange(kannadaCursorPos + 1, kannadaCursorPos + 1);
     
     // reconvert the text
     convertAndDisplay();
