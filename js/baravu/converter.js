@@ -116,7 +116,7 @@ function processConsonantClusters(text) {
     const consonantChars = KB_CHARACTER_SETS.consonants;
     
     // Handle subscript 'ra' (ರ್ + consonant → consonant + f)
-    const subscriptRaPattern = new RegExp(`ರ್([${consonantChars}])`, 'g');
+    const subscriptRaPattern = new RegExp(`ರ್(?!ರ)([${consonantChars}])`, 'g');
     text = text.replace(subscriptRaPattern, '$1f');
     
     // Convert standalone ರ್ (ra with virama, no following consonant)

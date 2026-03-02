@@ -102,5 +102,13 @@ const test_data = [
       tulusri: "ശ്രീ",
       baravu: "SArXI"
     }
+  },
+  {
+    name: "Handling Arkaೀ",
+    input: "ಪರ್ರೆ",
+    expected: {
+      tulusri: "പർരെ",
+      baravu: "perAr"
+    }
   }
 ];
