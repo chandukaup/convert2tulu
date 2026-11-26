@@ -10,7 +10,7 @@ function changeFontSize() {
     const fontSize = document.getElementById('fontSize').value;
     document.getElementById('fontSizeValue').textContent = fontSize;
     
-    kannadaInput.style.fontSize = fontSize + 'px';
+    if (window.kannadaInput) kannadaInput.style.fontSize = fontSize + 'px';
     tuluOutput.style.fontSize = fontSize + 'px';
 }
 
@@ -59,7 +59,7 @@ function changeFont() {
     // Check if switching between baravu and tulusri
     if (typeof window.currentFontType !== 'undefined' && 
         window.currentFontType !== newFontType && 
-        kannadaInput.value.trim() !== '') {
+        window.kannadaInput && kannadaInput.value.trim() !== '') {
         
         if (confirm('Switching between Baravu and Tulusri fonts will clear your text as they use different encoding systems.\n\nContinue?')) {
             kannadaInput.value = '';
@@ -293,7 +293,7 @@ window.addEventListener('load', () => {
     applyFont(fontSelect.value);
     
     // Focus on Kannada input
-    kannadaInput.focus();
+    if (window.kannadaInput) kannadaInput.focus();
 });
 
 // Focus on load

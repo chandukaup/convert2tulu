@@ -183,7 +183,7 @@ body {
 /* Converter Cards */
 .converter-cards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 30px;
     margin-bottom: 80px;
 }
@@ -658,5 +658,71 @@ body {
     
     .action-buttons-left {
         width: 100%;
+    }
+}
+
+/* Tulu keyboard page */
+.keyboard-page {
+    max-width: 760px;
+}
+
+.keyboard-page .text-area.large {
+    min-height: 160px;
+}
+
+.keyboard-section {
+    margin-bottom: 20px;
+}
+
+.keyboard-layout-picker {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.keyboard-layout-picker select {
+    background: var(--button-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+
+/* Gboard default theme colours */
+tulu-keyboard {
+    --tk-bg: #263238;
+    --tk-key-bg: #3B464C;
+    --tk-fn-key-bg: #2E3A40;
+    --tk-key-color: #FFFFFF;
+    --tk-key-border: #4A565C;
+    --tk-key-shadow: rgba(0, 0, 0, 0.4);
+    --tk-vowel-hover-bg: #2E3A40;
+    --tk-accent: #4DB6AC;
+    --tk-enter-bg: #4DB6AC;
+    --tk-enter-color: #FFFFFF;
+    max-width: none;
+}
+
+body.light-theme tulu-keyboard {
+    --tk-bg: #F0F4F9;
+    --tk-key-bg: #FFFFFF;
+    --tk-fn-key-bg: #E4E7E9;
+    --tk-key-color: #3C4043;
+    --tk-key-border: #DADCE0;
+    --tk-key-shadow: rgba(60, 64, 67, 0.2);
+    --tk-vowel-hover-bg: #E4E7E9;
+}
+
+@media (max-width: 768px) {
+    .keyboard-page.container {
+        padding: 12px;
+    }
+
+    .keyboard-page .text-area.large {
+        min-height: 110px;
     }
 }
