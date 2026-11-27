@@ -670,14 +670,6 @@ body {
     min-height: 160px;
 }
 
-.keyboard-page .kannada-alongside {
-    margin-bottom: 12px;
-}
-
-.keyboard-page .kannada-alongside .text-area {
-    font-family: 'Noto Sans Kannada', 'Nirmala UI', 'Kannada Sangam MN', sans-serif;
-}
-
 .keyboard-section {
     margin-bottom: 20px;
 }

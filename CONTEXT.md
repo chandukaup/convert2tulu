@@ -28,9 +28,6 @@ _Avoid_: virtual keyboard, IME
 The script printed on the keys of the Tulu keyboard: Tulu script by default, or Kannada, or IAST. For people who do not yet read Tulu script on the keys. It does not change what is typed; by default the text box still shows Tulu script.
 _Avoid_: keyboard mode, keyboard language
 
-**Kannada alongside**:
-An optional second text box that shows the same typing in Kannada script while the main box shows Tulu script.
-_Avoid_: dual output, Kannada output mode
 
 **Consonant grid**:
 The rows of the Tulu keyboard holding one key per consonant, two vargas to a row in alphabet order.

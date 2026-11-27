@@ -38,7 +38,6 @@ The Baravu fonts are not served to other sites, so point `font-url` at your own 
 |---|---|---|
 | `labels` | `tulu`, `kannada`, `iast` | `tulu` |
 | `label-switch` | `show`, `hide` | `show` |
-| `kannada-target` | CSS selector of a second box for Kannada text alongside Tulu script | none |
 | `layout` | `auto`, `wide`, `compact` | `auto` |
 | `font` | `baravu`, `baravu-mandara` | `baravu` |
 | `font-url` | URL of a Baravu font file | none |

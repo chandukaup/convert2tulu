@@ -8,7 +8,6 @@
     Attributes:
         labels        tulu | kannada | iast   Script printed on the keys (default: tulu)
         label-switch  show | hide             Let visitors change the label script (default: show)
-        kannada-target  CSS selector       Optional second box showing Kannada text alongside Tulu script
         layout        auto | wide | compact   Key arrangement; auto picks by width (default: auto)
         font          baravu | baravu-mandara Baravu font for labels and output (default: baravu)
         font-url      URL of a Baravu font file to use instead of a font already on the page
@@ -37,8 +36,6 @@
     const SERVE_FONTS_TO_OTHER_SITES = false;
 
     const WIDE_LAYOUT_MIN_WIDTH = 600;
-    const KANNADA_FONT_STACK = "'Noto Sans Kannada', 'Nirmala UI', 'Kannada Sangam MN', sans-serif";
-    // Used for the optional kannada-target box only.
 
     function loadScript(src) {
         return new Promise((resolve, reject) => {
@@ -151,7 +148,7 @@
 
     class TuluKeyboard extends HTMLElement {
         static get observedAttributes() {
-            return ['labels', 'label-switch', 'kannada-target', 'layout', 'font', 'font-url', 'target'];
+            return ['labels', 'label-switch', 'layout', 'font', 'font-url', 'target'];
         }
 
         constructor() {
@@ -197,7 +194,6 @@
             dependenciesReady.then(() => {
                 this._ready = true;
                 this._attachTarget();
-                this._attachKannadaTarget();
                 this._applyFont();
                 this._render();
             }).catch(error => console.error(error.message));
@@ -211,7 +207,6 @@
         attributeChangedCallback(name) {
             if (!this._ready) return;
             if (name === 'target') this._attachTarget();
-            if (name === 'kannada-target') this._attachKannadaTarget();
             if (['font', 'font-url', 'target'].includes(name)) this._applyFont();
             this._render();
         }
@@ -269,21 +264,6 @@
             if (selector && !this._target) console.warn(`tulu-keyboard: no element matches target "${selector}"`);
             if (this._target) this._target.addEventListener('keydown', this._onKeydown);
             this._output.hidden = Boolean(this._target);
-        }
-
-        _attachKannadaTarget() {
-            const selector = this.getAttribute('kannada-target');
-            this._kannadaTarget = selector ? document.querySelector(selector) : null;
-            if (selector && !this._kannadaTarget) console.warn(`tulu-keyboard: no element matches kannada-target "${selector}"`);
-            if (this._kannadaTarget) this._kannadaTarget.style.fontFamily = KANNADA_FONT_STACK;
-            this._syncKannadaTarget();
-        }
-
-        _syncKannadaTarget() {
-            if (!this._kannadaTarget) return;
-            if ('value' in this._kannadaTarget) this._kannadaTarget.value = this._kannada;
-            else this._kannadaTarget.textContent = this._kannada;
-            this._kannadaTarget.scrollTop = this._kannadaTarget.scrollHeight;
         }
 
         _edit(change) {
@@ -345,7 +325,6 @@
             if ('value' in output) output.value = baravu;
             else output.textContent = baravu;
             output.scrollTop = output.scrollHeight;
-            this._syncKannadaTarget();
             this._renderToolbar();
             this._renderKeys();
         }

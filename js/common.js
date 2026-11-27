@@ -12,8 +12,6 @@ function changeFontSize() {
     
     if (window.kannadaInput) kannadaInput.style.fontSize = fontSize + 'px';
     tuluOutput.style.fontSize = fontSize + 'px';
-    const kannadaAlongside = document.getElementById('kannadaOutput');
-    if (kannadaAlongside) kannadaAlongside.style.fontSize = fontSize + 'px';
 }
 
 function changeTextColor() {

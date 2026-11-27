@@ -19,13 +19,7 @@
         <!-- Info -->
         <div class="info">
             <span class="info-icon">💡</span>
-            <span>Tap the keys to type in Tulu. Tap a consonant, then pick its vowel form from the row above it. Keys with an orange dot are Tulu-only sounds. You can show Kannada text in a second box above the Tulu text if you want both together.</span>
-        </div>
-
-        <!-- Kannada alongside Tulu (optional) -->
-        <div class="kannada-alongside" id="kannadaPanel" hidden>
-            <label class="tulu-label" for="kannadaOutput">Kannada text</label>
-            <textarea id="kannadaOutput" class="text-area small" readonly placeholder="Same typing, shown in Kannada script…"></textarea>
+            <span>Tap the keys to type in Tulu. Tap a consonant, then pick its vowel form from the row above it. Keys with an orange dot are Tulu-only sounds. Key labels (Tulu / Kannada / IAST) change only what is printed on the keys.</span>
         </div>
 
         <!-- Converted Tulu Section -->
@@ -43,10 +37,6 @@
                     <option value="wide">Wide</option>
                     <option value="compact">Compact</option>
                 </select>
-                <label class="keyboard-option">
-                    <input type="checkbox" id="showKannadaPanel">
-                    Show Kannada text alongside Tulu
-                </label>
             </div>
             <tulu-keyboard id="tuluKeyboard" target="#tuluOutput" persist="tulukeyboard-text"></tulu-keyboard>
         </div>
@@ -83,24 +73,6 @@
         layoutSelect.addEventListener('change', () => {
             tuluKeyboard.setAttribute('layout', layoutSelect.value);
             localStorage.setItem('tulukeyboard-layout', layoutSelect.value);
-        });
-
-        const kannadaPanel = document.getElementById('kannadaPanel');
-        const showKannadaPanel = document.getElementById('showKannadaPanel');
-        const syncKannadaPanel = () => {
-            const on = showKannadaPanel.checked;
-            kannadaPanel.hidden = !on;
-            if (on) {
-                tuluKeyboard.setAttribute('kannada-target', '#kannadaOutput');
-            } else {
-                tuluKeyboard.removeAttribute('kannada-target');
-            }
-        };
-        showKannadaPanel.checked = localStorage.getItem('tulukeyboard-show-kannada') === '1';
-        syncKannadaPanel();
-        showKannadaPanel.addEventListener('change', () => {
-            syncKannadaPanel();
-            localStorage.setItem('tulukeyboard-show-kannada', showKannadaPanel.checked ? '1' : '0');
         });
 
         tuluKeyboard.addEventListener('change', event => {
