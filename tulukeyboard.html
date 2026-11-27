@@ -19,7 +19,13 @@
         <!-- Info -->
         <div class="info">
             <span class="info-icon">💡</span>
-            <span>Tap the keys to type in Tulu. Tap a consonant, then pick its vowel form from the row above it. Keys with an orange dot are Tulu-only sounds. Key labels (Tulu / Kannada / IAST) change only what is printed on the keys, not the script in the text box.</span>
+            <span>Tap the keys to type in Tulu. Tap a consonant, then pick its vowel form from the row above it. Keys with an orange dot are Tulu-only sounds. You can show Kannada text in a second box above the Tulu text if you want both together.</span>
+        </div>
+
+        <!-- Kannada alongside Tulu (optional) -->
+        <div class="kannada-alongside" id="kannadaPanel" hidden>
+            <label class="tulu-label" for="kannadaOutput">Kannada text</label>
+            <textarea id="kannadaOutput" class="text-area small" readonly placeholder="Same typing, shown in Kannada script…"></textarea>
         </div>
 
         <!-- Converted Tulu Section -->
@@ -38,8 +44,8 @@
                     <option value="compact">Compact</option>
                 </select>
                 <label class="keyboard-option">
-                    <input type="checkbox" id="kannadaMirror">
-                    Also show Kannada text in the box while key labels are Kannada
+                    <input type="checkbox" id="showKannadaPanel">
+                    Show Kannada text alongside Tulu
                 </label>
             </div>
             <tulu-keyboard id="tuluKeyboard" target="#tuluOutput" persist="tulukeyboard-text"></tulu-keyboard>
@@ -79,15 +85,22 @@
             localStorage.setItem('tulukeyboard-layout', layoutSelect.value);
         });
 
-        const kannadaMirror = document.getElementById('kannadaMirror');
-        kannadaMirror.checked = localStorage.getItem('tulukeyboard-kannada-mirror') === '1';
-        const syncKannadaMirror = () => {
-            tuluKeyboard.setAttribute('kannada-output', kannadaMirror.checked ? 'with-labels' : 'never');
+        const kannadaPanel = document.getElementById('kannadaPanel');
+        const showKannadaPanel = document.getElementById('showKannadaPanel');
+        const syncKannadaPanel = () => {
+            const on = showKannadaPanel.checked;
+            kannadaPanel.hidden = !on;
+            if (on) {
+                tuluKeyboard.setAttribute('kannada-target', '#kannadaOutput');
+            } else {
+                tuluKeyboard.removeAttribute('kannada-target');
+            }
         };
-        syncKannadaMirror();
-        kannadaMirror.addEventListener('change', () => {
-            syncKannadaMirror();
-            localStorage.setItem('tulukeyboard-kannada-mirror', kannadaMirror.checked ? '1' : '0');
+        showKannadaPanel.checked = localStorage.getItem('tulukeyboard-show-kannada') === '1';
+        syncKannadaPanel();
+        showKannadaPanel.addEventListener('change', () => {
+            syncKannadaPanel();
+            localStorage.setItem('tulukeyboard-show-kannada', showKannadaPanel.checked ? '1' : '0');
         });
 
         tuluKeyboard.addEventListener('change', event => {
