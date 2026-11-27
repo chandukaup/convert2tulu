@@ -89,6 +89,7 @@ function renderButtonActions() {
                                 <optgroup label="baravu-fonts">
                                     <option value="baravu" selected>Baravu</option>
                                     <option value="baravu-mandara">Baravu Mandara</option>
+                                    <option value="mallige">Mallige</option>
                                     <!-- <option value="baravu-pingara">Baravu Pingara</option> -->
                                     <!-- <option value="baravu-allige">Baravu Allige</option> -->
                                 </optgroup>

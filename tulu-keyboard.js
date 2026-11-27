@@ -9,7 +9,7 @@
         labels        tulu | kannada | iast   Script printed on the keys (default: tulu)
         label-switch  show | hide             Let visitors change the label script (default: show)
         layout        auto | wide | compact   Key arrangement; auto picks by width (default: auto)
-        font          baravu | baravu-mandara Baravu font for labels and output (default: baravu)
+        font          baravu | baravu-mandara | mallige  Baravu-family font for labels and output (default: baravu)
         font-url      URL of a Baravu font file to use instead of a font already on the page
         target        CSS selector of an existing output box to write into
         persist       localStorage key; when set, the text survives a page refresh
@@ -30,8 +30,16 @@
         { path: 'js/tulukeyboard/logic.js', loaded: () => typeof TuluKeyboardLogic !== 'undefined' }
     ];
 
-    const FONT_FAMILIES = { 'baravu': 'baravu_1', 'baravu-mandara': 'baravu_mandara' };
-    const FONT_FILES = { 'baravu': 'assets/fonts/baravu_1.ttf', 'baravu-mandara': 'assets/fonts/baravu_mandara.ttf' };
+    const FONT_FAMILIES = {
+        'baravu': 'baravu_1',
+        'baravu-mandara': 'baravu_mandara',
+        'mallige': 'mallige_v1_4'
+    };
+    const FONT_FILES = {
+        'baravu': 'assets/fonts/baravu_1.ttf',
+        'baravu-mandara': 'assets/fonts/baravu_mandara.ttf',
+        'mallige': 'assets/fonts/malligev1.4.ttf'
+    };
     // Keep false until Jai Tulunad agrees to other sites loading the Baravu fonts from this one.
     const SERVE_FONTS_TO_OTHER_SITES = false;
 

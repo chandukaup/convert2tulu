@@ -9,7 +9,7 @@
     <link rel="canonical" href="https://convert2tulu.netlify.app/tulukeyboard">
     <link rel="stylesheet" href="/css/common.css?v=1.02">
 </head>
-<body>
+<body data-help="keyboard">
     <!-- Header -->
     <div id="header"></div>
 
@@ -19,7 +19,7 @@
         <!-- Info -->
         <div class="info">
             <span class="info-icon">💡</span>
-            <span>Tap the keys to type in Tulu. Tap a consonant, then pick its vowel form from the row above it. Keys with an orange dot are Tulu-only sounds. Key labels (Tulu / Kannada / IAST) change only what is printed on the keys.</span>
+            <span>Tap the keys below to write in Tulu script. Open ❓ Help in the header for consonants, vowels, and key labels.</span>
         </div>
 
         <!-- Converted Tulu Section -->
@@ -30,15 +30,7 @@
 
         <!-- Keyboard -->
         <div class="keyboard-section">
-            <div class="keyboard-layout-picker">
-                <label for="layoutSelect">Layout:</label>
-                <select id="layoutSelect">
-                    <option value="auto" selected>Automatic</option>
-                    <option value="wide">Wide</option>
-                    <option value="compact">Compact</option>
-                </select>
-            </div>
-            <tulu-keyboard id="tuluKeyboard" target="#tuluOutput" persist="tulukeyboard-text"></tulu-keyboard>
+            <tulu-keyboard id="tuluKeyboard" target="#tuluOutput" persist="tulukeyboard-text" layout="wide"></tulu-keyboard>
         </div>
 
         <div id="action-button-section"></div>
@@ -67,13 +59,8 @@
             tuluKeyboard.setAttribute('font', event.target.value);
         });
 
-        const layoutSelect = document.getElementById('layoutSelect');
-        layoutSelect.value = localStorage.getItem('tulukeyboard-layout') || 'auto';
-        tuluKeyboard.setAttribute('layout', layoutSelect.value);
-        layoutSelect.addEventListener('change', () => {
-            tuluKeyboard.setAttribute('layout', layoutSelect.value);
-            localStorage.setItem('tulukeyboard-layout', layoutSelect.value);
-        });
+        // Layout picker hidden for now; wide default. Revive .keyboard-layout-picker + localStorage key `tulukeyboard-layout`.
+        tuluKeyboard.setAttribute('layout', 'wide');
 
         tuluKeyboard.addEventListener('change', event => {
             debugLog(`Kannada: "${event.detail.kannada}" → Baravu: "${event.detail.baravu}"`);
