@@ -21,12 +21,16 @@ _Avoid_: Tulu text, output
 ### Keyboard
 
 **Tulu keyboard**:
-An on-screen keyboard for writing Tulu script by tapping keys, used in place of a typing box. Each tap adds to Kannada text kept behind the scenes, which is then shown as Tulu script.
+An on-screen keyboard for writing Tulu script by tapping keys, used in place of a typing box. Each tap adds to Kannada text kept behind the scenes, which is then shown as Tulu script or as Kannada text.
 _Avoid_: virtual keyboard, IME
 
 **Key label script**:
-The script printed on the keys of the Tulu keyboard: Tulu script by default, or Kannada, or IAST.
+The script printed on the keys of the Tulu keyboard: Tulu script by default, or Kannada, or IAST. It never changes what is typed or shown.
 _Avoid_: keyboard mode, keyboard language
+
+**Output script**:
+The script in which the typed text is shown and copied: Tulu script by default, or Kannada text. It is chosen separately from the key label script.
+_Avoid_: output mode, display language
 
 **Consonant grid**:
 The rows of the Tulu keyboard holding one key per consonant, two vargas to a row in alphabet order.

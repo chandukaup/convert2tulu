@@ -141,6 +141,36 @@ function testTapSequences() {
             baravu: 'kaM'
         },
         {
+            name: 'Vocalic RR vowel ೠ',
+            steps: [tap.vowel('ೠ')],
+            kannada: 'ೠ',
+            baravu: 'XARR'
+        },
+        {
+            name: 'Vocalic RR vowel sign ೄ',
+            steps: [tap.consonant('ಕ'), tap.sign('ೄ')],
+            kannada: 'ಕೄ',
+            baravu: 'kRR'
+        },
+        {
+            name: 'Om phrase key',
+            steps: [L.PHRASES[0]].map(p => tap.text(p)),
+            kannada: 'ಓಂ',
+            baravu: 'FAamXA'
+        },
+        {
+            name: 'Shri phrase key',
+            steps: [L.PHRASES[1]].map(p => tap.text(p)),
+            kannada: 'ಶ್ರೀ',
+            baravu: 'SArXI'
+        },
+        {
+            name: 'Phrase keys inside a word',
+            steps: [tap.text('ಜೈ'), tap.text(' '), tap.text(L.PHRASES[1])],
+            kannada: 'ಜೈ ಶ್ರೀ',
+            baravu: 'eej SArXI'
+        },
+        {
             name: 'Digits',
             steps: [tap.text('೧'), tap.text('೨')],
             kannada: '೧೨',
@@ -181,6 +211,15 @@ function testVowelRow() {
     const kta = L.vowelRow('ಅಕ್ತ');
     TestRunner.assert(kta[1].kannada === 'ಕ್ತಾ', 'Vowel row covers the whole conjunct', kta[1].kannada);
 
+    const shri = L.vowelRow('ಶ್ರೀ');
+    TestRunner.assert(shri[1].kannada === 'ಶ್ರಾ' && shri.find(k => k.active).sign === 'ೀ', 'After ಶ್ರೀ the row is for ಶ್ರ with ೀ active', JSON.stringify(shri.find(k => k.active)));
+
+    const om = L.vowelRow('ಓಂ');
+    TestRunner.assert(om[0].kannada === 'ಅ', 'After ಓಂ shows standalone vowels', JSON.stringify(om[0]));
+
+    TestRunner.assert(L.VOWELS.includes('ೠ') && L.vowelRow('').some(k => k.kannada === 'ೠ'), 'Standalone vowels include ೠ', JSON.stringify(L.VOWELS));
+    TestRunner.assert(L.vowelRow('ಕ').some(k => k.kannada === 'ಕೄ'), 'Vowel row after ಕ includes ಕೄ', JSON.stringify(L.vowelRow('ಕ').map(k => k.kannada)));
+
     const tuluOnly = L.vowelRow('ಕೆ' + ZWJ);
     TestRunner.assert(tuluOnly.find(k => k.active).sign === 'ೆ' + ZWJ, 'Tulu-only sign is active, not the regular ೆ', JSON.stringify(tuluOnly.find(k => k.active)));
 }
@@ -202,6 +241,10 @@ function testIast() {
         ['ಕು' + ZWJ, 'kŭ'],
         ['ಎ' + ZWJ, 'ɛ'],
         ['ಐ', 'ai'],
+        ['ೠ', 'ṝ'],
+        ['ಕೄ', 'kṝ'],
+        ['ಶ್ರೀ', 'śrī'],
+        ['ಓಂ', 'ōṁ'],
         ['ಕಂ', 'kaṁ'],
         ['೧', '1']
     ];

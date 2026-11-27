@@ -75,6 +75,12 @@
             localStorage.setItem('tulukeyboard-layout', layoutSelect.value);
         });
 
+        // Remember whether the output is shown as Tulu script or Kannada.
+        tuluKeyboard.setAttribute('output', localStorage.getItem('tulukeyboard-output') || 'tulu');
+        new MutationObserver(() => {
+            localStorage.setItem('tulukeyboard-output', tuluKeyboard.getAttribute('output'));
+        }).observe(tuluKeyboard, { attributes: true, attributeFilter: ['output'] });
+
         tuluKeyboard.addEventListener('change', event => {
             debugLog(`Kannada: "${event.detail.kannada}" → Baravu: "${event.detail.baravu}"`);
         });

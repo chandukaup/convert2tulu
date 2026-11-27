@@ -23,14 +23,17 @@ const TuluKeyboardLogic = (() => {
 
     // '' is the bare consonant. Entries ending in ZWJ are Tulu-only vowels.
     const SIGNS = [
-        '', 'ಾ', 'ಿ', 'ೀ', 'ು', 'ೂ', 'ೃ', 'ೆ', 'ೇ', 'ೈ', 'ೊ', 'ೋ', 'ೌ', VIRAMA,
+        '', 'ಾ', 'ಿ', 'ೀ', 'ು', 'ೂ', 'ೃ', 'ೄ', 'ೆ', 'ೇ', 'ೈ', 'ೊ', 'ೋ', 'ೌ', VIRAMA,
         'ೆ' + ZWJ, 'ೇ' + ZWJ, 'ು' + ZWJ
     ];
 
     const VOWELS = [
-        'ಅ', 'ಆ', 'ಇ', 'ಈ', 'ಉ', 'ಊ', 'ಋ', 'ಎ', 'ಏ', 'ಐ', 'ಒ', 'ಓ', 'ಔ',
+        'ಅ', 'ಆ', 'ಇ', 'ಈ', 'ಉ', 'ಊ', 'ಋ', 'ೠ', 'ಎ', 'ಏ', 'ಐ', 'ಒ', 'ಓ', 'ಔ',
         'ಎ' + ZWJ, 'ಏ' + ZWJ, 'ಉ' + ZWJ
     ];
+
+    // Phrases the converter writes as one unit (KB_PREDEFINED_PHRASES).
+    const PHRASES = ['ಓಂ', 'ಶ್ರೀ'];
 
     const DIGITS = ['೧', '೨', '೩', '೪', '೫', '೬', '೭', '೮', '೯', '೦'];
     const PUNCTUATION = ['.', ',', '?', '!', '।', '-', '(', ')', ':', ';', '"', "'"];
@@ -99,7 +102,7 @@ const TuluKeyboardLogic = (() => {
         'ೆ': 'e', 'ೇ': 'ē', 'ೈ': 'ai', 'ೊ': 'o', 'ೋ': 'ō', 'ೌ': 'au', [VIRAMA]: ''
     };
     const IAST_VOWELS = {
-        'ಅ': 'a', 'ಆ': 'ā', 'ಇ': 'i', 'ಈ': 'ī', 'ಉ': 'u', 'ಊ': 'ū', 'ಋ': 'ṛ',
+        'ಅ': 'a', 'ಆ': 'ā', 'ಇ': 'i', 'ಈ': 'ī', 'ಉ': 'u', 'ಊ': 'ū', 'ಋ': 'ṛ', 'ೠ': 'ṝ',
         'ಎ': 'e', 'ಏ': 'ē', 'ಐ': 'ai', 'ಒ': 'o', 'ಓ': 'ō', 'ಔ': 'au'
     };
     // Keyed by the Kannada vowel or sign that the joiner follows.
@@ -137,7 +140,7 @@ const TuluKeyboardLogic = (() => {
 
     return {
         ZWJ, ZWNJ, VIRAMA, ANUSVARA, VISARGA,
-        CONSONANTS, SIGNS, VOWELS, DIGITS, PUNCTUATION,
+        CONSONANTS, SIGNS, VOWELS, PHRASES, DIGITS, PUNCTUATION,
         activeCluster, addText, setSign, deleteLast, vowelRow, isTuluOnly, toIast
     };
 })();

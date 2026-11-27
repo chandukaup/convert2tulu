@@ -8,6 +8,8 @@
     Attributes:
         labels        tulu | kannada | iast   Script printed on the keys (default: tulu)
         label-switch  show | hide             Let visitors change the label script (default: show)
+        output        tulu | kannada          Show and copy the text as Tulu script or Kannada (default: tulu)
+        output-switch show | hide             Let visitors change the output (default: show)
         layout        auto | wide | compact   Key arrangement; auto picks by width (default: auto)
         font          baravu | baravu-mandara Baravu font for labels and output (default: baravu)
         font-url      URL of a Baravu font file to use instead of a font already on the page
@@ -36,6 +38,7 @@
     const SERVE_FONTS_TO_OTHER_SITES = false;
 
     const WIDE_LAYOUT_MIN_WIDTH = 600;
+    const KANNADA_FONT_STACK = "'Noto Sans Kannada', 'Nirmala UI', 'Kannada Sangam MN', sans-serif";
 
     function loadScript(src) {
         return new Promise((resolve, reject) => {
@@ -73,8 +76,11 @@
             color: var(--tk-key-color, #3C4043);
             outline: none;
         }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: var(--tk-gap, 6px); }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 6px 12px; flex-wrap: wrap; margin-bottom: var(--tk-gap, 6px); }
         .tools { display: flex; gap: 6px; margin-left: auto; }
+        .switches { display: contents; }
+        .group { display: flex; align-items: center; gap: 6px; }
+        .caption { font-size: 13px; opacity: 0.75; }
         .seg { display: inline-flex; border: 1px solid var(--tk-key-border, #ccc); border-radius: var(--tk-radius, 8px); overflow: hidden; }
         .seg button, .tool {
             background: var(--tk-key-bg, #fff); color: var(--tk-key-color, #3C4043);
@@ -110,7 +116,7 @@
         .key.fn { background: var(--tk-fn-key-bg, #E4E7E9); font-size: 15px; }
         .key.enter { background: var(--tk-enter-bg, #4DB6AC); color: var(--tk-enter-color, #fff); }
         .key.w15 { flex-basis: calc(var(--unit) * 1.5 + var(--gap) * 0.5); }
-        .key.w5 { flex-basis: calc(var(--unit) * 5 + var(--gap) * 4); }
+        .key.w3 { flex-basis: calc(var(--unit) * 3 + var(--gap) * 2); }
         .key.tulu-only::after {
             content: ''; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px;
             border-radius: 50%; background: var(--tk-tulu-only-color, #e9a23b);
@@ -146,7 +152,7 @@
 
     class TuluKeyboard extends HTMLElement {
         static get observedAttributes() {
-            return ['labels', 'label-switch', 'layout', 'font', 'font-url', 'target'];
+            return ['labels', 'label-switch', 'output', 'output-switch', 'layout', 'font', 'font-url', 'target'];
         }
 
         constructor() {
@@ -183,6 +189,10 @@
         connectedCallback() {
             if (!this.hasAttribute('tabindex')) this.tabIndex = 0;
             this._resizeObserver.observe(this);
+            // A host page's own load handler may reset the target's font; apply ours again after it.
+            if (document.readyState !== 'complete') {
+                window.addEventListener('load', () => this._ready && this._applyFont(), { once: true });
+            }
             const key = this.getAttribute('persist');
             if (key && localStorage.getItem(key)) this._kannada = localStorage.getItem(key);
             dependenciesReady.then(() => {
@@ -201,7 +211,7 @@
         attributeChangedCallback(name) {
             if (!this._ready) return;
             if (name === 'target') this._attachTarget();
-            if (name === 'font' || name === 'font-url' || name === 'target') this._applyFont();
+            if (['font', 'font-url', 'target', 'output'].includes(name)) this._applyFont();
             this._render();
         }
 
@@ -226,6 +236,15 @@
             return ['tulu', 'kannada', 'iast'].includes(labels) ? labels : 'tulu';
         }
 
+        get _outputScript() {
+            return this.getAttribute('output') === 'kannada' ? 'kannada' : 'tulu';
+        }
+
+        /** The text shown in the output box and copied: Tulu script (Baravu text) or Kannada text. */
+        get _shownText() {
+            return this._outputScript === 'kannada' ? this._kannada : this.baravu;
+        }
+
         get _layout() {
             const layout = this.getAttribute('layout');
             if (layout === 'wide' || layout === 'compact') return layout;
@@ -245,8 +264,9 @@
                 registerFont(family, new URL(FONT_FILES[font], SCRIPT_BASE).href);
             }
             const stack = `'${family}', Arial, sans-serif`;
-            this._output.style.fontFamily = stack;
-            if (this._target) this._target.style.fontFamily = stack;
+            const shownFont = this._outputScript === 'kannada' ? KANNADA_FONT_STACK : stack;
+            this._output.style.fontFamily = shownFont;
+            if (this._target) this._target.style.fontFamily = shownFont;
             this.style.setProperty('--tk-baravu-font', stack);
             document.fonts.load(`16px '${family}'`).then(() => this._renderKeys());
         }
@@ -288,8 +308,9 @@
                     this._renderKeys();
                     break;
                 case 'labels': this.setAttribute('labels', value); break;
+                case 'output': this.setAttribute('output', value); break;
                 case 'copy':
-                    navigator.clipboard.writeText(this.baravu).catch(() => console.warn('tulu-keyboard: copy failed'));
+                    navigator.clipboard.writeText(this._shownText).catch(() => console.warn('tulu-keyboard: copy failed'));
                     break;
                 case 'clear':
                     if (this._kannada && confirm('Clear all text?')) this.clear();
@@ -311,24 +332,29 @@
 
         _render() {
             if (!this._ready) return;
-            const baravu = this.baravu;
+            const shown = this._shownText;
             const output = this._target || this._output;
-            if ('value' in output) output.value = baravu;
-            else output.textContent = baravu;
+            if ('value' in output) output.value = shown;
+            else output.textContent = shown;
             output.scrollTop = output.scrollHeight;
             this._renderToolbar();
             this._renderKeys();
         }
 
         _renderToolbar() {
-            const labels = this._labels;
-            const options = [['tulu', 'Tulu'], ['kannada', 'ಕನ್ನಡ'], ['iast', 'IAST']];
-            const labelSwitch = this.getAttribute('label-switch') === 'hide' ? '' : `
-                <div class="seg" role="group" aria-label="Key labels">
-                    ${options.map(([value, text]) => `<button type="button" data-action="labels" data-value="${value}" aria-pressed="${labels === value}">${text}</button>`).join('')}
+            const switchGroup = (caption, action, current, options) => `
+                <div class="group">
+                    <span class="caption">${caption}</span>
+                    <div class="seg" role="group" aria-label="${caption}">
+                        ${options.map(([value, text]) => `<button type="button" data-action="${action}" data-value="${value}" aria-pressed="${current === value}">${text}</button>`).join('')}
+                    </div>
                 </div>`;
+            const keysSwitch = this.getAttribute('label-switch') === 'hide' ? '' : switchGroup(
+                'Keys:', 'labels', this._labels, [['tulu', 'Tulu'], ['kannada', 'ಕನ್ನಡ'], ['iast', 'IAST']]);
+            const outputSwitch = this.getAttribute('output-switch') === 'hide' ? '' : switchGroup(
+                'Output:', 'output', this._outputScript, [['tulu', 'Tulu'], ['kannada', 'ಕನ್ನಡ']]);
             const copy = this._target ? '' : '<button type="button" class="tool" data-action="copy">📋 Copy</button>';
-            this._toolbar.innerHTML = `${labelSwitch}<div class="tools">${copy}<button type="button" class="tool" data-action="clear">🗑️ Clear</button></div>`;
+            this._toolbar.innerHTML = `<div class="switches">${keysSwitch}${outputSwitch}</div><div class="tools">${copy}<button type="button" class="tool" data-action="clear">🗑️ Clear</button></div>`;
         }
 
         _renderKeys() {
@@ -368,8 +394,9 @@
                 : key('page', '', 'ಕಖಗ', { ariaLabel: 'Letters', fn: true, width: 'w15' });
             rows += row([
                 pageKey,
+                ...L.PHRASES.map(add),
                 add(','),
-                key('add', ' ', '', { label: 'space', ariaLabel: 'Space', width: 'w5' }),
+                key('add', ' ', '', { label: 'space', ariaLabel: 'Space', width: 'w3' }),
                 add('.'),
                 key('add', '\n', '', { label: '↵', ariaLabel: 'New line', fn: true, width: 'w15 enter' })
             ]);
