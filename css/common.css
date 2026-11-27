@@ -777,6 +777,76 @@ body.help-open {
     min-height: 160px;
 }
 
+.tulu-output-wrap {
+    position: relative;
+}
+
+.tulu-keyboard-caret-marker {
+    position: absolute;
+    width: 2px;
+    margin-left: -1px;
+    background: #26c6da;
+    pointer-events: none;
+    z-index: 2;
+    border-radius: 1px;
+    animation: tulu-caret-blink 1s step-end infinite;
+    display: none;
+}
+
+body.light-theme .tulu-keyboard-caret-marker {
+    background: #00838f;
+}
+
+@keyframes tulu-caret-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.tulu-keyboard-caret-mirror {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    pointer-events: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    box-sizing: border-box;
+}
+
+.keyboard-page .text-area.tulu-output {
+    cursor: text;
+    user-select: text;
+    -webkit-user-select: text;
+    caret-color: transparent;
+    color-scheme: dark;
+}
+
+.keyboard-page .text-area.tulu-output::selection {
+    background: rgba(77, 182, 172, 0.5);
+    color: var(--text-primary);
+}
+
+body.light-theme .keyboard-page .text-area.tulu-output {
+    caret-color: transparent;
+    color-scheme: light;
+}
+
+body.light-theme .keyboard-page .text-area.tulu-output::selection {
+    background: rgba(0, 121, 107, 0.35);
+}
+
+.keyboard-page .text-area.tulu-output:focus {
+    border-color: #4db6ac;
+    box-shadow: 0 0 0 2px rgba(77, 182, 172, 0.45);
+    outline: 2px solid rgba(255, 255, 255, 0.15);
+    outline-offset: 0;
+}
+
+body.light-theme .keyboard-page .text-area.tulu-output:focus {
+    outline-color: rgba(0, 77, 64, 0.12);
+}
+
 .keyboard-section {
     margin-bottom: 20px;
 }

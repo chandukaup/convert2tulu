@@ -255,8 +255,74 @@ function testIast() {
     });
 }
 
+function testInsertAtCaret() {
+    console.log('\n🧪 Testing insert / set sign at caret...\n');
+
+    const mid = L.addTextAt('ಕಕ', 1, ' ');
+    TestRunner.assert(
+        mid.text === 'ಕ ಕ' && mid.caret === 3,
+        'Insert space in middle',
+        JSON.stringify(mid)
+    );
+
+    const signed = L.setSignAt('ಕ ಕ', 1, 'ಿ');
+    TestRunner.assert(
+        signed.text.slice(0, 2) === 'ಕಿ',
+        'Vowel sign on cluster before caret',
+        JSON.stringify(signed)
+    );
+
+    const row = L.vowelRow('ಕ ಕ', 1);
+    TestRunner.assert(
+        row.some(k => k.sign === 'ಿ' && k.kannada.startsWith('ಕ')),
+        'Vowel row follows caret cluster',
+        JSON.stringify(row[0])
+    );
+}
+
+function testDeleteBeforeIndex() {
+    console.log('\n🧪 Testing delete before caret index...\n');
+
+    const mid = L.deleteBeforeIndex('ಕಕ', 1);
+    TestRunner.assert(
+        mid.text === 'ಕ' && mid.caret === 0,
+        'Backspace in middle of Kannada text',
+        JSON.stringify(mid)
+    );
+
+    const tuluOnly = L.deleteBeforeIndex('ಕ' + 'ೆ' + ZWJ + 'ಕ', 3);
+    TestRunner.assert(
+        tuluOnly.text === 'ಕಕ' && tuluOnly.caret === 1,
+        'Backspace on Tulu-only vowel sign at caret',
+        JSON.stringify(tuluOnly)
+    );
+}
+
+function testBaravuCaretMapping() {
+    console.log('\n🧪 Testing Baravu offset ↔ Kannada index...\n');
+
+    const text = 'ಕಕ';
+    const baravu = convertKannadaToASCII(text);
+    let kannadaIdx = 0;
+    for (let i = 1; i <= text.length; i++) {
+        if (convertKannadaToASCII(text.slice(0, i)).length >= 1) {
+            kannadaIdx = i;
+            break;
+        }
+    }
+    const afterDelete = L.deleteBeforeIndex(text, kannadaIdx);
+    TestRunner.assert(
+        afterDelete.text === 'ಕ' && convertKannadaToASCII(afterDelete.text).length < baravu.length,
+        'Delete at mapped index shortens Baravu output',
+        `${text} → ${baravu}, idx ${kannadaIdx}`
+    );
+}
+
 function runAllTests() {
     testTapSequences();
+    testInsertAtCaret();
+    testDeleteBeforeIndex();
+    testBaravuCaretMapping();
     testVowelRow();
     testIast();
     TestRunner.printSummary();

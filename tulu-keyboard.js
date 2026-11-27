@@ -162,6 +162,8 @@
         constructor() {
             super();
             this._kannada = '';
+            this._pendingCaretKannada = null;
+            this._caretKannada = 0;
             this._page = 'letters';
             this._ready = false;
             this._width = 0;
@@ -177,10 +179,21 @@
             this._keyboard = this.shadowRoot.querySelector('.keyboard');
 
             this.shadowRoot.addEventListener('click', event => this._onClick(event));
+            this.shadowRoot.addEventListener('mousedown', event => {
+                if (this._target && event.target.closest('button[data-action]')) {
+                    event.preventDefault();
+                }
+            });
             this._keyboard.addEventListener('pointerdown', event => this._showPreview(event));
             ['pointerup', 'pointercancel', 'pointerleave'].forEach(type =>
                 this._keyboard.addEventListener(type, () => this._hidePreview()));
             this._onKeydown = this._onKeydown.bind(this);
+            this._onTargetCaret = this._onTargetCaret.bind(this);
+            this._onTargetBeforeInput = event => event.preventDefault();
+            this._onTargetPaste = event => event.preventDefault();
+            this._onTargetScroll = () => this._updateCaretMarker();
+            this._onTargetFocus = () => this._updateCaretMarker();
+            this._onTargetBlur = () => this._hideCaretMarker();
             this.addEventListener('keydown', this._onKeydown);
             this._resizeObserver = new ResizeObserver(entries => {
                 const width = entries[0].contentRect.width;
@@ -209,7 +222,7 @@
 
         disconnectedCallback() {
             this._resizeObserver.disconnect();
-            if (this._target) this._target.removeEventListener('keydown', this._onKeydown);
+            this._detachTargetListeners();
         }
 
         attributeChangedCallback(name) {
@@ -265,19 +278,179 @@
             document.fonts.load(`16px '${family}'`).then(() => this._renderKeys());
         }
 
+        _detachTargetListeners() {
+            if (!this._target) return;
+            this._target.removeEventListener('keydown', this._onKeydown);
+            this._target.removeEventListener('beforeinput', this._onTargetBeforeInput);
+            this._target.removeEventListener('paste', this._onTargetPaste);
+            this._target.removeEventListener('scroll', this._onTargetScroll);
+            this._target.removeEventListener('focus', this._onTargetFocus);
+            this._target.removeEventListener('blur', this._onTargetBlur);
+            ['click', 'keyup', 'select'].forEach(type =>
+                this._target.removeEventListener(type, this._onTargetCaret));
+        }
+
         _attachTarget() {
-            if (this._target) this._target.removeEventListener('keydown', this._onKeydown);
+            this._detachTargetListeners();
             const selector = this.getAttribute('target');
             this._target = selector ? document.querySelector(selector) : null;
             if (selector && !this._target) console.warn(`tulu-keyboard: no element matches target "${selector}"`);
-            if (this._target) this._target.addEventListener('keydown', this._onKeydown);
+            if (this._target) {
+                this._target.addEventListener('keydown', this._onKeydown);
+                this._target.addEventListener('beforeinput', this._onTargetBeforeInput);
+                this._target.addEventListener('paste', this._onTargetPaste);
+                this._target.addEventListener('scroll', this._onTargetScroll);
+                this._target.addEventListener('focus', this._onTargetFocus);
+                this._target.addEventListener('blur', this._onTargetBlur);
+                ['click', 'keyup', 'select'].forEach(type =>
+                    this._target.addEventListener(type, this._onTargetCaret));
+                this._setupCaretMarker();
+            } else {
+                this._hideCaretMarker();
+            }
             this._output.hidden = Boolean(this._target);
+        }
+
+        _setupCaretMarker() {
+            if (!this._target) return;
+            const wrap = this._target.parentElement;
+            if (!wrap) return;
+            wrap.classList.add('tulu-output-wrap');
+            if (!this._caretMarker) {
+                this._caretMarker = document.createElement('div');
+                this._caretMarker.className = 'tulu-keyboard-caret-marker';
+                this._caretMarker.setAttribute('aria-hidden', 'true');
+                wrap.appendChild(this._caretMarker);
+            }
+            if (!this._caretMirror) {
+                this._caretMirror = document.createElement('div');
+                this._caretMirror.className = 'tulu-keyboard-caret-mirror';
+                wrap.appendChild(this._caretMirror);
+            }
+        }
+
+        _hideCaretMarker() {
+            if (this._caretMarker) this._caretMarker.style.display = 'none';
+        }
+
+        _syncCaretMirrorSize() {
+            if (!this._target || !this._caretMirror) return;
+            const el = this._target;
+            const style = getComputedStyle(el);
+            const mirror = this._caretMirror;
+            mirror.style.left = `${el.offsetLeft}px`;
+            mirror.style.top = `${el.offsetTop}px`;
+            mirror.style.width = `${el.clientWidth}px`;
+            mirror.style.height = `${el.clientHeight}px`;
+            mirror.style.overflow = 'hidden';
+            mirror.scrollTop = el.scrollTop;
+            mirror.style.font = style.font;
+            mirror.style.fontSize = style.fontSize;
+            mirror.style.fontFamily = style.fontFamily;
+            mirror.style.lineHeight = style.lineHeight;
+            mirror.style.letterSpacing = style.letterSpacing;
+            mirror.style.padding = style.padding;
+            mirror.style.border = '0 solid transparent';
+            mirror.style.boxSizing = style.boxSizing;
+        }
+
+        _measureTargetCaret(el, index) {
+            if (!this._caretMirror) return null;
+            this._syncCaretMirrorSize();
+            const mirror = this._caretMirror;
+            const wrap = el.parentElement;
+            const text = el.value;
+            const safe = index <= 0 ? '' : text.slice(0, index);
+            mirror.textContent = '';
+            mirror.appendChild(document.createTextNode(safe));
+            const probe = document.createElement('span');
+            probe.textContent = text[index] || '\u200b';
+            mirror.appendChild(probe);
+            const wrapRect = wrap ? wrap.getBoundingClientRect() : el.getBoundingClientRect();
+            const probeRect = probe.getBoundingClientRect();
+            const style = getComputedStyle(el);
+            const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.6;
+            return {
+                left: probeRect.left - wrapRect.left,
+                top: probeRect.top - wrapRect.top,
+                height: lineHeight
+            };
+        }
+
+        _updateCaretMarker() {
+            if (!this._caretMarker || !this._target || document.activeElement !== this._target) {
+                this._hideCaretMarker();
+                return;
+            }
+            const index = this._target.selectionStart;
+            const pos = this._measureTargetCaret(this._target, index);
+            if (!pos) return;
+            this._caretMarker.style.display = 'block';
+            this._caretMarker.style.left = `${pos.left}px`;
+            this._caretMarker.style.top = `${pos.top}px`;
+            this._caretMarker.style.height = `${pos.height}px`;
+        }
+
+        _baravuOffsetToKannadaIndex(kannada, offset) {
+            if (offset <= 0) return 0;
+            for (let i = 1; i <= kannada.length; i++) {
+                if (convertKannadaToASCII(kannada.slice(0, i)).length >= offset) return i;
+            }
+            return kannada.length;
+        }
+
+        _kannadaIndexToBaravuOffset(kannada, index) {
+            return convertKannadaToASCII(kannada.slice(0, index)).length;
+        }
+
+        _activeKannadaCaret() {
+            if (this._target && document.activeElement === this._target && 'selectionStart' in this._target) {
+                const k = this._baravuOffsetToKannadaIndex(this._kannada, this._target.selectionStart);
+                this._caretKannada = k;
+                return k;
+            }
+            if (typeof this._caretKannada === 'number') {
+                return Math.min(Math.max(0, this._caretKannada), this._kannada.length);
+            }
+            return this._kannada.length;
+        }
+
+        _restoreTargetCaret(offset, atEnd) {
+            if (!this._target) return;
+            const el = this._target;
+            const apply = () => {
+                el.focus({ preventScroll: !atEnd });
+                try {
+                    el.setSelectionRange(offset, offset);
+                } catch {
+                    /* unsupported */
+                }
+                if (atEnd) el.scrollTop = el.scrollHeight;
+                this._updateCaretMarker();
+            };
+            requestAnimationFrame(() => requestAnimationFrame(apply));
+        }
+
+        _onTargetCaret() {
+            if (!this._target || !('selectionStart' in this._target)) return;
+            const k = this._baravuOffsetToKannadaIndex(this._kannada, this._target.selectionStart);
+            this._pendingCaretKannada = k;
+            this._caretKannada = k;
+            this._renderKeys();
+            this._updateCaretMarker();
         }
 
         _edit(change) {
             const before = this._kannada;
-            this._kannada = change(before);
-            if (this._kannada === before || !this._ready) return;
+            const result = change(before);
+            const next = result && typeof result === 'object' && 'text' in result ? result.text : result;
+            if (next === before || !this._ready) return;
+            this._kannada = next;
+            if (result && typeof result === 'object' && 'text' in result) {
+                this._pendingCaretKannada = result.caret;
+            } else {
+                this._pendingCaretKannada = next.length;
+            }
             const key = this.getAttribute('persist');
             if (key) localStorage.setItem(key, this._kannada);
             this._render();
@@ -294,9 +467,11 @@
             const { action, value } = button.dataset;
             const L = TuluKeyboardLogic;
             switch (action) {
-                case 'add': this._edit(text => L.addText(text, value)); break;
-                case 'sign': this._edit(text => L.setSign(text, value)); break;
-                case 'backspace': this._edit(L.deleteLast); break;
+                case 'add': this._edit(text => L.addTextAt(text, this._activeKannadaCaret(), value)); break;
+                case 'sign': this._edit(text => L.setSignAt(text, this._activeKannadaCaret(), value)); break;
+                case 'backspace':
+                    this._edit(text => L.deleteBeforeIndex(text, this._activeKannadaCaret()));
+                    break;
                 case 'page':
                     this._page = this._page === 'letters' ? 'numbers' : 'letters';
                     this._renderKeys();
@@ -315,11 +490,22 @@
         }
 
         _onKeydown(event) {
+            const nav = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'];
+            if (event.target === this._target) {
+                if (nav.includes(event.key)) {
+                    queueMicrotask(() => this._onTargetCaret());
+                    return;
+                }
+                if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                    event.preventDefault();
+                    return;
+                }
+            }
             if (event.ctrlKey || event.metaKey || event.altKey) return;
             const edits = {
-                Backspace: TuluKeyboardLogic.deleteLast,
-                ' ': text => text + ' ',
-                Enter: text => text + '\n'
+                Backspace: text => TuluKeyboardLogic.deleteBeforeIndex(text, this._activeKannadaCaret()),
+                ' ': text => TuluKeyboardLogic.addTextAt(text, this._activeKannadaCaret(), ' '),
+                Enter: text => TuluKeyboardLogic.addTextAt(text, this._activeKannadaCaret(), '\n')
             };
             if (!edits[event.key]) return;
             event.preventDefault();
@@ -330,9 +516,28 @@
             if (!this._ready) return;
             const baravu = this.baravu;
             const output = this._target || this._output;
-            if ('value' in output) output.value = baravu;
-            else output.textContent = baravu;
-            output.scrollTop = output.scrollHeight;
+            const caretK = this._pendingCaretKannada != null
+                ? this._pendingCaretKannada
+                : this._kannada.length;
+            this._pendingCaretKannada = null;
+            this._caretKannada = caretK;
+            if ('value' in output) {
+                output.value = baravu;
+                const offset = this._kannadaIndexToBaravuOffset(this._kannada, caretK);
+                const atEnd = caretK >= this._kannada.length;
+                if (this._target) {
+                    this._restoreTargetCaret(offset, atEnd);
+                } else {
+                    try {
+                        output.setSelectionRange(offset, offset);
+                    } catch {
+                        /* not focused */
+                    }
+                    if (atEnd) output.scrollTop = output.scrollHeight;
+                }
+            } else {
+                output.textContent = baravu;
+            }
             this._renderToolbar();
             this._renderKeys();
         }
@@ -364,7 +569,8 @@
             const add = c => key('add', c, c);
             const row = keys => `<div class="row">${keys.join('')}</div>`;
 
-            const vowelRow = L.vowelRow(this._kannada).map(k => k.sign === null
+            const vowelCaret = this._caretKannada ?? this._kannada.length;
+            const vowelRow = L.vowelRow(this._kannada, vowelCaret).map(k => k.sign === null
                 ? add(k.kannada)
                 : key('sign', k.sign, k.kannada, { active: k.active }));
             const splitter = key('add', L.ZWNJ, '', { label: 'split', ariaLabel: 'Splitter', fn: true, width: 'w15' });

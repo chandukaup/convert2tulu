@@ -25,7 +25,11 @@
         <!-- Converted Tulu Section -->
         <div class="tulu-section">
             <label class="tulu-label" for="tuluOutput">Tulu Text</label>
-            <textarea id="tuluOutput" class="text-area large" readonly placeholder="Tap the keys below..."></textarea>
+            <div class="tulu-output-wrap">
+                <textarea id="tuluOutput" class="text-area large tulu-output" rows="6"
+                    placeholder="Tap the keys below…" aria-readonly="true" autocomplete="off" autocorrect="off"
+                    spellcheck="false" inputmode="none"></textarea>
+            </div>
         </div>
 
         <!-- Keyboard -->

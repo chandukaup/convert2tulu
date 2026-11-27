@@ -4,5 +4,5 @@ The Tulu keyboard stores what the user taps as Kannada text and reruns the exist
 
 ## Consequences
 
-- The output box is append-only. A cursor position in Baravu text does not map cleanly to a position in Kannada text, so tapping into the middle of the output to edit is out of scope until that mapping exists.
+- Edits use a Kannada caret: the output box caret maps to Kannada via the converter prefix lengths. Insert, vowel signs, and backspace apply at that caret. Clicking between Baravu characters may snap to the nearest Kannada boundary; very unusual conjunct splits are a known limitation.
 - Any key whose effect cannot be expressed as Kannada text, such as a Tulu-only vowel, needs a Kannada encoding the converter understands, like the invisible joiner it already uses.

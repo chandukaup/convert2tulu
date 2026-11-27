@@ -45,39 +45,70 @@ const TuluKeyboardLogic = (() => {
     );
 
     /**
-     * The consonant or conjunct at the end of the text, with the vowel sign on it.
-     * Returns null when the text does not end in a consonant.
+     * Consonant cluster (and optional vowel sign) immediately before index in text.
+     * index is where the next character would be inserted (Kannada caret).
      */
-    function activeCluster(text) {
-        const m = text.match(CLUSTER_AT_END);
+    function activeClusterAt(text, index) {
+        const caret = Math.max(0, Math.min(index, text.length));
+        const m = text.slice(0, caret).match(CLUSTER_AT_END);
         return m ? { start: m.index, cluster: m[1], sign: m[2] || '' } : null;
     }
 
+    /** @deprecated use activeClusterAt(text, text.length) */
+    function activeCluster(text) {
+        return activeClusterAt(text, text.length);
+    }
+
+    function addTextAt(text, index, addition) {
+        const caret = Math.max(0, Math.min(index, text.length));
+        const next = text.slice(0, caret) + addition + text.slice(caret);
+        return { text: next, caret: caret + addition.length };
+    }
+
     function addText(text, addition) {
-        return text + addition;
+        return addTextAt(text, text.length, addition).text;
     }
 
     /**
-     * Puts the vowel sign on the active cluster, replacing any sign already there.
-     * Does nothing when there is no active cluster.
+     * Puts the vowel sign on the cluster before index, replacing any sign already there.
      */
+    function setSignAt(text, index, sign) {
+        const active = activeClusterAt(text, index);
+        if (!active) return { text, caret: index };
+        const tail = active.start + active.cluster.length + active.sign.length;
+        const next = text.slice(0, active.start) + active.cluster + sign + text.slice(tail);
+        return { text: next, caret: active.start + active.cluster.length + sign.length };
+    }
+
     function setSign(text, sign) {
-        const active = activeCluster(text);
-        if (!active) return text;
-        return text.slice(0, active.start) + active.cluster + sign;
+        return setSignAt(text, text.length, sign).text;
+    }
+
+    /**
+     * Removes one Kannada character before index (caret in Kannada coordinates).
+     * Tulu-only vowels use ZWJ and are removed in one step.
+     */
+    function deleteBeforeIndex(text, index) {
+        if (index <= 0) return { text, caret: 0 };
+        const removeFrom = text[index - 1] === ZWJ ? index - 2 : index - 1;
+        return {
+            text: text.slice(0, removeFrom) + text.slice(index),
+            caret: removeFrom
+        };
     }
 
     /** Removes the last character, treating a Tulu-only vowel as one character. */
     function deleteLast(text) {
-        return text.endsWith(ZWJ) ? text.slice(0, -2) : text.slice(0, -1);
+        return deleteBeforeIndex(text, text.length).text;
     }
 
     /**
      * The keys of the vowel row for the current text: the active cluster with each
      * vowel sign, or the standalone vowels when there is no active cluster.
      */
-    function vowelRow(text) {
-        const active = activeCluster(text);
+    function vowelRow(text, index) {
+        const caret = index === undefined ? text.length : index;
+        const active = activeClusterAt(text, caret);
         if (!active) {
             return VOWELS.map(v => ({ kannada: v, sign: null, active: false }));
         }
@@ -141,6 +172,7 @@ const TuluKeyboardLogic = (() => {
     return {
         ZWJ, ZWNJ, VIRAMA, ANUSVARA, VISARGA,
         CONSONANTS, SIGNS, VOWELS, PHRASES, DIGITS, PUNCTUATION,
-        activeCluster, addText, setSign, deleteLast, vowelRow, isTuluOnly, toIast
+        activeCluster, activeClusterAt, addText, addTextAt, setSign, setSignAt,
+        deleteBeforeIndex, deleteLast, vowelRow, isTuluOnly, toIast
     };
 })();
