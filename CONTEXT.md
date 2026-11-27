@@ -21,7 +21,7 @@ _Avoid_: Tulu text, output
 ### Keyboard
 
 **Tulu keyboard**:
-An on-screen keyboard for writing Tulu script by tapping keys, used in place of a typing box. Each tap adds to Kannada text kept behind the scenes, which is then shown as Tulu script or as Kannada text.
+An on-screen keyboard for writing Tulu script by tapping keys, used in place of a typing box. Each tap adds to Kannada text kept behind the scenes, which is then shown as Tulu script.
 _Avoid_: virtual keyboard, IME
 
 **Key label script**:
