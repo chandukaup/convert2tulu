@@ -38,8 +38,7 @@ The Baravu fonts are not served to other sites, so point `font-url` at your own 
 |---|---|---|
 | `labels` | `tulu`, `kannada`, `iast` | `tulu` |
 | `label-switch` | `show`, `hide` | `show` |
-| `output` | `tulu`, `kannada` (how the text is shown and copied) | `tulu` |
-| `output-switch` | `show`, `hide` | `show` |
+| `kannada-output` | `never`, `with-labels` (show Kannada in the box only while key labels are Kannada) | `never` |
 | `layout` | `auto`, `wide`, `compact` | `auto` |
 | `font` | `baravu`, `baravu-mandara` | `baravu` |
 | `font-url` | URL of a Baravu font file | none |

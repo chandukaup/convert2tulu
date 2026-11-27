@@ -19,7 +19,7 @@
         <!-- Info -->
         <div class="info">
             <span class="info-icon">💡</span>
-            <span>Tap the keys to type in Tulu. Tap a consonant, then pick its vowel form from the row above it. Keys with an orange dot are Tulu-only sounds.</span>
+            <span>Tap the keys to type in Tulu. Tap a consonant, then pick its vowel form from the row above it. Keys with an orange dot are Tulu-only sounds. Key labels (Tulu / Kannada / IAST) change only what is printed on the keys, not the script in the text box.</span>
         </div>
 
         <!-- Converted Tulu Section -->
@@ -37,6 +37,10 @@
                     <option value="wide">Wide</option>
                     <option value="compact">Compact</option>
                 </select>
+                <label class="keyboard-option">
+                    <input type="checkbox" id="kannadaMirror">
+                    Also show Kannada text in the box while key labels are Kannada
+                </label>
             </div>
             <tulu-keyboard id="tuluKeyboard" target="#tuluOutput" persist="tulukeyboard-text"></tulu-keyboard>
         </div>
@@ -75,11 +79,16 @@
             localStorage.setItem('tulukeyboard-layout', layoutSelect.value);
         });
 
-        // Remember whether the output is shown as Tulu script or Kannada.
-        tuluKeyboard.setAttribute('output', localStorage.getItem('tulukeyboard-output') || 'tulu');
-        new MutationObserver(() => {
-            localStorage.setItem('tulukeyboard-output', tuluKeyboard.getAttribute('output'));
-        }).observe(tuluKeyboard, { attributes: true, attributeFilter: ['output'] });
+        const kannadaMirror = document.getElementById('kannadaMirror');
+        kannadaMirror.checked = localStorage.getItem('tulukeyboard-kannada-mirror') === '1';
+        const syncKannadaMirror = () => {
+            tuluKeyboard.setAttribute('kannada-output', kannadaMirror.checked ? 'with-labels' : 'never');
+        };
+        syncKannadaMirror();
+        kannadaMirror.addEventListener('change', () => {
+            syncKannadaMirror();
+            localStorage.setItem('tulukeyboard-kannada-mirror', kannadaMirror.checked ? '1' : '0');
+        });
 
         tuluKeyboard.addEventListener('change', event => {
             debugLog(`Kannada: "${event.detail.kannada}" → Baravu: "${event.detail.baravu}"`);

@@ -8,8 +8,7 @@
     Attributes:
         labels        tulu | kannada | iast   Script printed on the keys (default: tulu)
         label-switch  show | hide             Let visitors change the label script (default: show)
-        output        tulu | kannada          Show and copy the text as Tulu script or Kannada (default: tulu)
-        output-switch show | hide             Let visitors change the output (default: show)
+        kannada-output  never | with-labels   Show Kannada text only while key labels are Kannada (default: never)
         layout        auto | wide | compact   Key arrangement; auto picks by width (default: auto)
         font          baravu | baravu-mandara Baravu font for labels and output (default: baravu)
         font-url      URL of a Baravu font file to use instead of a font already on the page
@@ -78,9 +77,9 @@
         }
         .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 6px 12px; flex-wrap: wrap; margin-bottom: var(--tk-gap, 6px); }
         .tools { display: flex; gap: 6px; margin-left: auto; }
-        .switches { display: contents; }
         .group { display: flex; align-items: center; gap: 6px; }
         .caption { font-size: 13px; opacity: 0.75; }
+        .hint { font-size: 12px; opacity: 0.7; flex: 1 1 100%; margin: 0; }
         .seg { display: inline-flex; border: 1px solid var(--tk-key-border, #ccc); border-radius: var(--tk-radius, 8px); overflow: hidden; }
         .seg button, .tool {
             background: var(--tk-key-bg, #fff); color: var(--tk-key-color, #3C4043);
@@ -152,7 +151,7 @@
 
     class TuluKeyboard extends HTMLElement {
         static get observedAttributes() {
-            return ['labels', 'label-switch', 'output', 'output-switch', 'layout', 'font', 'font-url', 'target'];
+            return ['labels', 'label-switch', 'kannada-output', 'layout', 'font', 'font-url', 'target'];
         }
 
         constructor() {
@@ -211,7 +210,7 @@
         attributeChangedCallback(name) {
             if (!this._ready) return;
             if (name === 'target') this._attachTarget();
-            if (['font', 'font-url', 'target', 'output'].includes(name)) this._applyFont();
+            if (['font', 'font-url', 'target', 'kannada-output', 'labels'].includes(name)) this._applyFont();
             this._render();
         }
 
@@ -236,13 +235,13 @@
             return ['tulu', 'kannada', 'iast'].includes(labels) ? labels : 'tulu';
         }
 
-        get _outputScript() {
-            return this.getAttribute('output') === 'kannada' ? 'kannada' : 'tulu';
+        /** When true, the output box shows Kannada instead of Tulu script (Baravu text). */
+        get _mirrorKannadaOutput() {
+            return this.getAttribute('kannada-output') === 'with-labels' && this._labels === 'kannada';
         }
 
-        /** The text shown in the output box and copied: Tulu script (Baravu text) or Kannada text. */
         get _shownText() {
-            return this._outputScript === 'kannada' ? this._kannada : this.baravu;
+            return this._mirrorKannadaOutput ? this._kannada : this.baravu;
         }
 
         get _layout() {
@@ -264,7 +263,7 @@
                 registerFont(family, new URL(FONT_FILES[font], SCRIPT_BASE).href);
             }
             const stack = `'${family}', Arial, sans-serif`;
-            const shownFont = this._outputScript === 'kannada' ? KANNADA_FONT_STACK : stack;
+            const shownFont = this._mirrorKannadaOutput ? KANNADA_FONT_STACK : stack;
             this._output.style.fontFamily = shownFont;
             if (this._target) this._target.style.fontFamily = shownFont;
             this.style.setProperty('--tk-baravu-font', stack);
@@ -307,8 +306,10 @@
                     this._page = this._page === 'letters' ? 'numbers' : 'letters';
                     this._renderKeys();
                     break;
-                case 'labels': this.setAttribute('labels', value); break;
-                case 'output': this.setAttribute('output', value); break;
+                case 'labels':
+                    this.setAttribute('labels', value);
+                    this._applyFont();
+                    break;
                 case 'copy':
                     navigator.clipboard.writeText(this._shownText).catch(() => console.warn('tulu-keyboard: copy failed'));
                     break;
@@ -350,11 +351,12 @@
                     </div>
                 </div>`;
             const keysSwitch = this.getAttribute('label-switch') === 'hide' ? '' : switchGroup(
-                'Keys:', 'labels', this._labels, [['tulu', 'Tulu'], ['kannada', 'ಕನ್ನಡ'], ['iast', 'IAST']]);
-            const outputSwitch = this.getAttribute('output-switch') === 'hide' ? '' : switchGroup(
-                'Output:', 'output', this._outputScript, [['tulu', 'Tulu'], ['kannada', 'ಕನ್ನಡ']]);
+                'Key labels:', 'labels', this._labels, [['tulu', 'Tulu'], ['kannada', 'ಕನ್ನಡ'], ['iast', 'IAST']]);
+            const hint = this._labels === 'kannada' && !this._mirrorKannadaOutput
+                ? '<p class="hint" part="hint">Key labels are Kannada for reference. Typed text appears in Tulu script.</p>'
+                : '';
             const copy = this._target ? '' : '<button type="button" class="tool" data-action="copy">📋 Copy</button>';
-            this._toolbar.innerHTML = `<div class="switches">${keysSwitch}${outputSwitch}</div><div class="tools">${copy}<button type="button" class="tool" data-action="clear">🗑️ Clear</button></div>`;
+            this._toolbar.innerHTML = `${keysSwitch}<div class="tools">${copy}<button type="button" class="tool" data-action="clear">🗑️ Clear</button></div>${hint}`;
         }
 
         _renderKeys() {

@@ -676,9 +676,10 @@ body {
 
 .keyboard-layout-picker {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     align-items: center;
-    gap: 8px;
+    gap: 8px 16px;
     margin-bottom: 8px;
     font-size: 14px;
     color: var(--text-secondary);
@@ -690,6 +691,19 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 4px 8px;
+}
+
+.keyboard-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.keyboard-option input {
+    accent-color: var(--accent-color);
 }
 
 /* Gboard default theme colours */

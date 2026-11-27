@@ -25,12 +25,12 @@ An on-screen keyboard for writing Tulu script by tapping keys, used in place of 
 _Avoid_: virtual keyboard, IME
 
 **Key label script**:
-The script printed on the keys of the Tulu keyboard: Tulu script by default, or Kannada, or IAST. It never changes what is typed or shown.
+The script printed on the keys of the Tulu keyboard: Tulu script by default, or Kannada, or IAST. For people who do not yet read Tulu script on the keys. It does not change what is typed; by default the text box still shows Tulu script.
 _Avoid_: keyboard mode, keyboard language
 
-**Output script**:
-The script in which the typed text is shown and copied: Tulu script by default, or Kannada text. It is chosen separately from the key label script.
-_Avoid_: output mode, display language
+**Kannada mirror**:
+An optional behaviour: while key labels are Kannada, the text box may show Kannada text instead of Tulu script. It is off by default.
+_Avoid_: output mode, Kannada output
 
 **Consonant grid**:
 The rows of the Tulu keyboard holding one key per consonant, two vargas to a row in alphabet order.
