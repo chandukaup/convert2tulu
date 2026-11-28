@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tulu Keyboard - Type in Tulu Script Online</title>
+    <meta name="description" content="Free on-screen Tulu keyboard. Tap the keys to type in Tulu script (Baravu font), with key labels in Tulu, Kannada or IAST.">
+    <meta name="author" content="Chandrahasa">
+    <link rel="canonical" href="https://convert2tulu.netlify.app/tulukeyboard">
+    <link rel="stylesheet" href="/css/common.css?v=1.02">
+</head>
+<body data-help="keyboard">
+    <!-- Header -->
+    <div id="header"></div>
+
+    <!-- Main Container -->
+    <div class="container keyboard-page">
+
+        <!-- Info -->
+        <div class="info">
+            <span class="info-icon">💡</span>
+            <span>Tap the keys below to write in Tulu script. Open ❓ Help in the header for consonants, vowels, and key labels.</span>
+        </div>
+
+        <!-- Converted Tulu Section -->
+        <div class="tulu-section">
+            <label class="tulu-label" for="tuluOutput">Tulu Text</label>
+            <div class="tulu-output-wrap">
+                <textarea id="tuluOutput" class="text-area large tulu-output" rows="6"
+                    placeholder="Tap the keys below…" aria-readonly="true" autocomplete="off" autocorrect="off"
+                    spellcheck="false" inputmode="none"></textarea>
+            </div>
+        </div>
+
+        <!-- Keyboard -->
+        <div class="keyboard-section">
+            <tulu-keyboard id="tuluKeyboard" target="#tuluOutput" persist="tulukeyboard-text" layout="wide"></tulu-keyboard>
+        </div>
+
+        <div id="action-button-section"></div>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer"></div>
+
+    <!-- js for components -->
+    <script src="/js/components.js?v=1.02"></script>
+    <script>
+        document.getElementById('header').innerHTML = renderHeader();
+        document.getElementById('footer').innerHTML = renderFooter();
+        document.getElementById('action-button-section').innerHTML = renderButtonActions();
+        // Tulu Sri uses a different encoding, so only Baravu fonts are offered here.
+        document.querySelector('#fontSelect optgroup[label="tulusri-font"]').remove();
+    </script>
+
+    <!-- js for application -->
+    <script type="text/javascript" src="/js/common.js?v=1.02" charset="utf-8"></script>
+    <script src="/tulu-keyboard.js?v=1.02"></script>
+    <script>
+        const tuluKeyboard = document.getElementById('tuluKeyboard');
+
+        document.getElementById('fontSelect').addEventListener('change', event => {
+            tuluKeyboard.setAttribute('font', event.target.value);
+        });
+
+        // Layout picker hidden for now; wide default. Revive .keyboard-layout-picker + localStorage key `tulukeyboard-layout`.
+        tuluKeyboard.setAttribute('layout', 'wide');
+
+        tuluKeyboard.addEventListener('change', event => {
+            debugLog(`Kannada: "${event.detail.kannada}" → Baravu: "${event.detail.baravu}"`);
+        });
+    </script>
+
+    <!-- for download image -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+</body>
+</html>

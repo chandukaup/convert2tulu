@@ -10,7 +10,7 @@ function changeFontSize() {
     const fontSize = document.getElementById('fontSize').value;
     document.getElementById('fontSizeValue').textContent = fontSize;
     
-    kannadaInput.style.fontSize = fontSize + 'px';
+    if (window.kannadaInput) kannadaInput.style.fontSize = fontSize + 'px';
     tuluOutput.style.fontSize = fontSize + 'px';
 }
 
@@ -59,7 +59,7 @@ function changeFont() {
     // Check if switching between baravu and tulusri
     if (typeof window.currentFontType !== 'undefined' && 
         window.currentFontType !== newFontType && 
-        kannadaInput.value.trim() !== '') {
+        window.kannadaInput && kannadaInput.value.trim() !== '') {
         
         if (confirm('Switching between Baravu and Tulusri fonts will clear your text as they use different encoding systems.\n\nContinue?')) {
             kannadaInput.value = '';
@@ -83,6 +83,7 @@ function applyFont(selectedFont) {
         'baravu-mandara': 'baravu_mandara',
         'baravu-pingara': 'baravu_pingara_v5',
         'baravu-allige': 'baravu_allige_1.4',
+        'mallige': 'mallige_v1_4',
         'tulusri': 'tulusri'
     };
     
@@ -256,13 +257,73 @@ function showToast(message) {
     }, 2000);
 }
 
+const PAGE_HELP = {
+    converter: {
+        title: 'Standard converter',
+        bullets: [
+            'Type Kannada in the box using <a href="https://www.google.com/intl/kn/inputtools/try/" target="_blank" rel="noopener">Google Input Tools</a> (or your usual Kannada keyboard).',
+            'Tulu script in the output box updates automatically as you type.',
+            'Open <strong>Original Kannada</strong> to see or edit the Kannada source, or use the section tools (anusvara, splitter, special characters).',
+            'Use <strong>Copy Text</strong>, <strong>Download Image</strong>, or <strong>Copy as Image</strong> to share the Tulu text.',
+            'Change font and styling from the buttons below the output.'
+        ]
+    },
+    keyboard: {
+        title: 'Tulu keyboard',
+        bullets: [
+            'The <strong>Tulu Text</strong> box shows Tulu script (Baravu font). Tap keys on the keyboard below — there is no separate Kannada typing box.',
+            'Tap a <strong>consonant</strong> in the main grid, then tap a form in the <strong>vowel row</strong> above it (that row shows the last consonant with each vowel).',
+            'With an empty line, the vowel row shows standalone vowels (ಅ, ಆ, ಇ, …).',
+            '<strong>Key labels:</strong> Tulu, ಕನ್ನಡ, or IAST changes only what is printed on the keys; output stays Tulu script.',
+            'Keys with an <strong>orange dot</strong> are Tulu-only sounds. Use <strong>split</strong> when two consonants should not join into one conjunct.',
+            'Bottom row: <strong>ಓಂ</strong> and <strong>ಶ್ರೀ</strong> phrase keys, <strong>123</strong> for numbers and punctuation (tap again for letters), and space / full stop / new line.',
+            'Choose a Baravu font from the font selector; use <strong>Copy Text</strong> or image buttons to share what is in the Tulu Text box.'
+        ]
+    }
+};
+
+function helpPageKey() {
+    const key = document.body.dataset.help;
+    if (key && PAGE_HELP[key]) return key;
+    return document.querySelector('.keyboard-page') ? 'keyboard' : 'converter';
+}
+
+function closeHelpModal() {
+    const modal = document.getElementById('helpModal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    document.body.classList.remove('help-open');
+}
+
 function showHelp() {
-    alert('Help:\n\n' +
-          '1. Type in Kannada using Google Input Tools\n' +
-          '2. Text converts automatically to Tulu\n' +
-          '3. Use 👁️ to show/hide original Kannada\n' +
-          '4. Use ✨ for special character conversions\n' +
-          '5. Download or copy as image for sharing');
+    const help = PAGE_HELP[helpPageKey()];
+    let modal = document.getElementById('helpModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'helpModal';
+        modal.className = 'help-modal';
+        modal.innerHTML = `
+            <div class="help-modal-backdrop" data-action="close-help"></div>
+            <div class="help-modal-panel" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
+                <div class="help-modal-header">
+                    <h2 id="helpModalTitle"></h2>
+                    <button type="button" class="help-modal-close" data-action="close-help" aria-label="Close">×</button>
+                </div>
+                <ul class="help-modal-list"></ul>
+            </div>`;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', event => {
+            if (event.target.closest('[data-action="close-help"]')) closeHelpModal();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeHelpModal();
+        });
+    }
+    modal.querySelector('#helpModalTitle').textContent = help.title;
+    modal.querySelector('.help-modal-list').innerHTML = help.bullets.map(item => `<li>${item}</li>`).join('');
+    modal.classList.add('open');
+    document.body.classList.add('help-open');
+    modal.querySelector('.help-modal-close').focus();
 }
 
 // Load saved theme on page load
@@ -293,7 +354,7 @@ window.addEventListener('load', () => {
     applyFont(fontSelect.value);
     
     // Focus on Kannada input
-    kannadaInput.focus();
+    if (window.kannadaInput) kannadaInput.focus();
 });
 
 // Focus on load

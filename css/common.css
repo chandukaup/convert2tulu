@@ -51,6 +51,11 @@ body.light-theme {
     src: url('../assets/fonts/baravu_allige_1.4.ttf') format('truetype'); 
 }
 
+@font-face {
+    font-family: 'mallige_v1_4';
+    src: url('../assets/fonts/malligev1.4.ttf') format('truetype');
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -183,7 +188,7 @@ body {
 /* Converter Cards */
 .converter-cards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 30px;
     margin-bottom: 80px;
 }
@@ -317,6 +322,108 @@ body {
 .toast.show {
     opacity: 1;
     transform: translate(-50%, -50%);
+}
+
+.help-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.help-modal.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.help-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.help-modal-panel {
+    position: relative;
+    max-width: 520px;
+    width: 100%;
+    max-height: min(85vh, 640px);
+    overflow-y: auto;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    padding: 20px 22px 18px;
+}
+
+.help-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.help-modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.help-modal-close {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--button-bg);
+    color: var(--text-primary);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.help-modal-close:hover {
+    background: var(--border-color);
+}
+
+.help-modal-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.help-modal-list li {
+    margin-bottom: 10px;
+}
+
+.help-modal-list li:last-child {
+    margin-bottom: 0;
+}
+
+.help-modal-list a {
+    color: var(--accent-color);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--accent-color);
+}
+
+.help-modal-list a:hover {
+    border-bottom-style: solid;
+}
+
+body.help-open {
+    overflow: hidden;
 }
     
 [data-title] {
@@ -658,5 +765,180 @@ body {
     
     .action-buttons-left {
         width: 100%;
+    }
+}
+
+/* Tulu keyboard page */
+.keyboard-page {
+    max-width: 760px;
+}
+
+.keyboard-page .text-area.large {
+    min-height: 160px;
+}
+
+.tulu-output-wrap {
+    position: relative;
+}
+
+.tulu-keyboard-caret-marker {
+    position: absolute;
+    width: 2px;
+    margin-left: -1px;
+    background: #26c6da;
+    pointer-events: none;
+    z-index: 2;
+    border-radius: 1px;
+    animation: tulu-caret-blink 1s step-end infinite;
+    display: none;
+}
+
+body.light-theme .tulu-keyboard-caret-marker {
+    background: #00838f;
+}
+
+@keyframes tulu-caret-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.tulu-keyboard-caret-mirror {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    pointer-events: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    box-sizing: border-box;
+}
+
+.keyboard-page .text-area.tulu-output {
+    cursor: text;
+    user-select: text;
+    -webkit-user-select: text;
+    caret-color: transparent;
+    color-scheme: dark;
+}
+
+.keyboard-page .text-area.tulu-output::selection {
+    background: rgba(77, 182, 172, 0.5);
+    color: var(--text-primary);
+}
+
+body.light-theme .keyboard-page .text-area.tulu-output {
+    caret-color: transparent;
+    color-scheme: light;
+}
+
+body.light-theme .keyboard-page .text-area.tulu-output::selection {
+    background: rgba(0, 121, 107, 0.35);
+}
+
+.keyboard-page .text-area.tulu-output:focus {
+    border-color: #4db6ac;
+    box-shadow: 0 0 0 2px rgba(77, 182, 172, 0.45);
+    outline: 2px solid rgba(255, 255, 255, 0.15);
+    outline-offset: 0;
+}
+
+body.light-theme .keyboard-page .text-area.tulu-output:focus {
+    outline-color: rgba(0, 77, 64, 0.12);
+}
+
+.keyboard-section {
+    margin-bottom: 20px;
+}
+
+.keyboard-layout-picker {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px 10px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.keyboard-layout-caption {
+    opacity: 0.85;
+}
+
+.keyboard-layout-picker .layout-seg {
+    display: inline-flex;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--button-bg);
+}
+
+.keyboard-layout-picker .layout-seg button {
+    background: transparent;
+    color: var(--text-primary);
+    border: 0;
+    padding: 7px 14px;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.keyboard-layout-picker .layout-seg button[aria-pressed="true"] {
+    background: var(--accent-color);
+    color: #fff;
+}
+
+.keyboard-layout-picker .layout-seg button:not([aria-pressed="true"]):hover {
+    background: var(--hover-bg, rgba(128, 128, 128, 0.12));
+}
+
+.keyboard-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.keyboard-option input {
+    accent-color: var(--accent-color);
+}
+
+/* Gboard default theme colours */
+tulu-keyboard {
+    --tk-bg: #263238;
+    --tk-key-bg: #3B464C;
+    --tk-fn-key-bg: #2E3A40;
+    --tk-key-color: #FFFFFF;
+    --tk-key-border: #4A565C;
+    --tk-key-shadow: rgba(0, 0, 0, 0.4);
+    --tk-vowel-hover-bg: #2E3A40;
+    --tk-accent: #4DB6AC;
+    --tk-enter-bg: #4DB6AC;
+    --tk-enter-color: #FFFFFF;
+    max-width: none;
+}
+
+body.light-theme tulu-keyboard {
+    --tk-bg: #F0F4F9;
+    --tk-key-bg: #FFFFFF;
+    --tk-fn-key-bg: #E4E7E9;
+    --tk-key-color: #3C4043;
+    --tk-key-border: #DADCE0;
+    --tk-key-shadow: rgba(60, 64, 67, 0.2);
+    --tk-vowel-hover-bg: #E4E7E9;
+}
+
+@media (max-width: 768px) {
+    .keyboard-page.container {
+        padding: 12px;
+    }
+
+    .keyboard-page .text-area.large {
+        min-height: 110px;
     }
 }

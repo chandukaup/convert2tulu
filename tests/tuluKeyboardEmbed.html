@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed check - Tulu keyboard</title>
+    <!-- Deliberately does not load the site's CSS, like a third-party page. -->
+    <style>
+        body { font-family: Georgia, serif; padding: 20px; background: #fdf6ec; }
+        #warm {
+            --tk-bg: #f3e2c7;
+            --tk-key-bg: #fffaf2;
+            --tk-key-border: #d9b98a;
+            --tk-fn-key-bg: #e2c9a3;
+            --tk-accent: #b5542c;
+            --tk-key-size: 52px;
+            --tk-radius: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Standalone keyboard with its own output box</h1>
+    <tulu-keyboard id="warm" font-url="../assets/fonts/baravu_1.ttf"></tulu-keyboard>
+    <p>Last change event: <code id="lastEvent">none</code></p>
+
+    <script src="../tulu-keyboard.js"></script>
+    <script>
+        document.getElementById('warm').addEventListener('change', event => {
+            document.getElementById('lastEvent').textContent = JSON.stringify(event.detail);
+        });
+    </script>
+</body>
+</html>
