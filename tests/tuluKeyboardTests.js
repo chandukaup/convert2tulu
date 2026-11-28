@@ -301,20 +301,41 @@ function testDeleteBeforeIndex() {
 function testBaravuCaretMapping() {
     console.log('\n🧪 Testing Baravu offset ↔ Kannada index...\n');
 
-    const text = 'ಕಕ';
-    const baravu = convertKannadaToASCII(text);
-    let kannadaIdx = 0;
-    for (let i = 1; i <= text.length; i++) {
-        if (convertKannadaToASCII(text.slice(0, i)).length >= 1) {
-            kannadaIdx = i;
-            break;
-        }
-    }
-    const afterDelete = L.deleteBeforeIndex(text, kannadaIdx);
+    const conjunct = 'ಕರ್ನ';
+    const baravuLen = convertKannadaToASCII(conjunct).length;
     TestRunner.assert(
-        afterDelete.text === 'ಕ' && convertKannadaToASCII(afterDelete.text).length < baravu.length,
-        'Delete at mapped index shortens Baravu output',
-        `${text} → ${baravu}, idx ${kannadaIdx}`
+        baravuLen < conjunct.length,
+        'ಕರ್ನ Baravu is shorter than Kannada length (regression guard)',
+        `${baravuLen} vs ${conjunct.length}`
+    );
+
+    // Simulate mapping used by the keyboard: caret at end of Baravu display must append in Kannada.
+    function kannadaIndexAtBaravuEnd(kannada, offset) {
+        if (offset <= 0) return 0;
+        const full = convertKannadaToASCII(kannada);
+        if (offset >= full.length) return kannada.length;
+        for (let i = 1; i < kannada.length; i++) {
+            if (convertKannadaToASCII(kannada.slice(0, i)).length >= offset) return i;
+        }
+        return kannada.length;
+    }
+
+    let t = conjunct;
+    const at = kannadaIndexAtBaravuEnd(t, baravuLen);
+    TestRunner.assert(
+        at === t.length,
+        'Caret at end of Baravu maps to end of Kannada (not knf→kranqk bug)',
+        `offset ${baravuLen}, mapped ${at}, kannada length ${t.length}`
+    );
+    t = L.addTextAt(t, at, 'ಾ').text;
+    t = L.addTextAt(t, t.length, 'ಟ').text;
+    t = L.setSignAt(t, t.length, 'ಾ').text;
+    t = L.addTextAt(t, t.length, 'ಕ').text;
+    const out = convertKannadaToASCII(t);
+    TestRunner.assert(
+        out.startsWith('knf') && out.includes('q'),
+        'Karnataka-style tap sequence after ಕರ್ನ+ಾ...',
+        `"${out}" from "${t}"`
     );
 }
 

@@ -393,7 +393,10 @@
 
         _baravuOffsetToKannadaIndex(kannada, offset) {
             if (offset <= 0) return 0;
-            for (let i = 1; i <= kannada.length; i++) {
+            const fullBaravu = convertKannadaToASCII(kannada);
+            // Baravu length can be shorter than Kannada (e.g. knf for ಕರ್ನ); caret at end of display = append.
+            if (offset >= fullBaravu.length) return kannada.length;
+            for (let i = 1; i < kannada.length; i++) {
                 if (convertKannadaToASCII(kannada.slice(0, i)).length >= offset) return i;
             }
             return kannada.length;
