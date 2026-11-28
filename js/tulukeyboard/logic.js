@@ -103,6 +103,126 @@ const TuluKeyboardLogic = (() => {
     }
 
     /**
+     * Maps a caret offset in the Baravu string back to a Kannada index.
+     * Scoped to one whitespace-separated word so Baravu shorter than Kannada
+     * (e.g. knf for ಕರ್ನ) maps to the end of that word and stays fast on long text.
+     */
+    function baravuOffsetToKannadaIndex(kannada, offset, convert) {
+        if (offset <= 0) return 0;
+        let baravuPos = 0;
+        const chunks = kannada.matchAll(/\s+|\S+/g);
+        for (const match of chunks) {
+            const chunk = match[0];
+            const chunkStart = match.index;
+            const chunkEnd = chunkStart + chunk.length;
+            if (/^\s+$/.test(chunk)) {
+                if (offset <= baravuPos + chunk.length) {
+                    return chunkStart + (offset - baravuPos);
+                }
+                baravuPos += chunk.length;
+            } else {
+                const wordBaravu = convert(chunk);
+                if (offset < baravuPos + wordBaravu.length) {
+                    const localOff = offset - baravuPos;
+                    for (let i = 1; i < chunk.length; i++) {
+                        if (convert(chunk.slice(0, i)).length >= localOff) {
+                            return chunkStart + (chunk[i] === ZWJ ? i + 1 : i);
+                        }
+                    }
+                    return chunkEnd;
+                }
+                if (offset === baravuPos + wordBaravu.length) {
+                    return chunkEnd;
+                }
+                baravuPos += wordBaravu.length;
+            }
+        }
+        return kannada.length;
+    }
+
+    /** Deletes the Kannada span corresponding to a Baravu selection [startOffset, endOffset). */
+    function deleteBaravuRange(kannada, startOffset, endOffset, convert) {
+        const start = Math.max(0, Math.min(startOffset, endOffset));
+        const end = Math.max(startOffset, endOffset);
+        if (end <= start) {
+            return { text: kannada, caret: baravuOffsetToKannadaIndex(kannada, start, convert) };
+        }
+        const kStart = baravuOffsetToKannadaIndex(kannada, start, convert);
+        const kEnd = baravuOffsetToKannadaIndex(kannada, end, convert);
+        if (kEnd <= kStart) return { text: kannada, caret: kStart };
+        return {
+            text: kannada.slice(0, kStart) + kannada.slice(kEnd),
+            caret: kStart
+        };
+    }
+
+    /**
+     * Backspace at a caret position in the Baravu display. Works within the single
+     * word containing the caret, treats Tulu-only vowel + ZWJ pairs as atomic units,
+     * and falls back to deleteBeforeIndex for multi-char Baravu glyphs (e.g. ಕು‍, ಶ್ರೀ).
+     */
+    function deleteBaravuCharBefore(kannada, baravuOffset, convert) {
+        if (baravuOffset <= 0) return { text: kannada, caret: 0 };
+        let baravuPos = 0;
+        const chunks = kannada.matchAll(/\s+|\S+/g);
+        for (const match of chunks) {
+            const chunk = match[0];
+            const chunkStart = match.index;
+            const chunkEnd = chunkStart + chunk.length;
+            if (/^\s+$/.test(chunk)) {
+                if (baravuOffset <= baravuPos + chunk.length) {
+                    const delIndex = chunkStart + (baravuOffset - baravuPos) - 1;
+                    return {
+                        text: kannada.slice(0, delIndex) + kannada.slice(delIndex + 1),
+                        caret: delIndex
+                    };
+                }
+                baravuPos += chunk.length;
+            } else {
+                const wordBaravu = convert(chunk);
+                if (baravuOffset <= baravuPos + wordBaravu.length) {
+                    const localOff = baravuOffset - baravuPos;
+                    const want = wordBaravu.slice(0, localOff - 1) + wordBaravu.slice(localOff);
+                    const approxK = baravuOffsetToKannadaIndex(chunk, localOff, convert);
+
+                    // Group Tulu-only vowel + ZWJ pairs as atomic units so ZWJ is never orphaned.
+                    const units = [];
+                    for (let i = 0; i < chunk.length; ) {
+                        if (chunk[i + 1] === ZWJ) {
+                            units.push([i, i + 2]);
+                            i += 2;
+                        } else {
+                            units.push([i, i + 1]);
+                            i += 1;
+                        }
+                    }
+                    // Prefer the unit immediately before (or closest to) approxK.
+                    units.sort((a, b) => {
+                        const distA = Math.abs(a[1] - approxK);
+                        const distB = Math.abs(b[1] - approxK);
+                        if (distA !== distB) return distA - distB;
+                        return b[1] - a[1];
+                    });
+
+                    for (const [uStart, uEnd] of units) {
+                        const nextWord = chunk.slice(0, uStart) + chunk.slice(uEnd);
+                        if (convert(nextWord) === want) {
+                            const newLocalCaret = baravuOffsetToKannadaIndex(nextWord, localOff - 1, convert);
+                            return {
+                                text: kannada.slice(0, chunkStart) + nextWord + kannada.slice(chunkEnd),
+                                caret: chunkStart + newLocalCaret
+                            };
+                        }
+                    }
+                    return deleteBeforeIndex(kannada, chunkStart + approxK);
+                }
+                baravuPos += wordBaravu.length;
+            }
+        }
+        return deleteBeforeIndex(kannada, kannada.length);
+    }
+
+    /**
      * The keys of the vowel row for the current text: the active cluster with each
      * vowel sign, or the standalone vowels when there is no active cluster.
      */
@@ -173,6 +293,7 @@ const TuluKeyboardLogic = (() => {
         ZWJ, ZWNJ, VIRAMA, ANUSVARA, VISARGA,
         CONSONANTS, SIGNS, VOWELS, PHRASES, DIGITS, PUNCTUATION,
         activeCluster, activeClusterAt, addText, addTextAt, setSign, setSignAt,
-        deleteBeforeIndex, deleteLast, vowelRow, isTuluOnly, toIast
+        baravuOffsetToKannadaIndex, deleteBaravuRange,
+        deleteBeforeIndex, deleteBaravuCharBefore, deleteLast, vowelRow, isTuluOnly, toIast
     };
 })();

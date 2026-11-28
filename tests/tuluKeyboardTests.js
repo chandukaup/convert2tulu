@@ -260,7 +260,7 @@ function testInsertAtCaret() {
 
     const mid = L.addTextAt('ಕಕ', 1, ' ');
     TestRunner.assert(
-        mid.text === 'ಕ ಕ' && mid.caret === 3,
+        mid.text === 'ಕ ಕ' && mid.caret === 2,
         'Insert space in middle',
         JSON.stringify(mid)
     );
@@ -277,6 +277,59 @@ function testInsertAtCaret() {
         row.some(k => k.sign === 'ಿ' && k.kannada.startsWith('ಕ')),
         'Vowel row follows caret cluster',
         JSON.stringify(row[0])
+    );
+}
+
+function testDeleteBaravuCharBefore() {
+    console.log('\n🧪 Testing Baravu-position backspace...\n');
+
+    const kannada = 'ತತ್ತರ';
+    const expected = 'ttAtr';
+    TestRunner.assert(
+        convertKannadaToASCII(kannada) === expected,
+        'ತತ್ತರ converts to ttAtr',
+        convertKannadaToASCII(kannada)
+    );
+
+    const mid = L.deleteBaravuCharBefore(kannada, 3, convertKannadaToASCII);
+    TestRunner.assert(
+        convertKannadaToASCII(mid.text) === 'tttr',
+        'Backspace before middle t removes one Baravu glyph (not tttr chaos)',
+        convertKannadaToASCII(mid.text)
+    );
+
+    const end = L.deleteBaravuCharBefore(kannada, 5, convertKannadaToASCII);
+    TestRunner.assert(
+        convertKannadaToASCII(end.text) === 'ttAt',
+        'Backspace before final r removes r',
+        convertKannadaToASCII(end.text)
+    );
+
+    const knfBack = L.deleteBaravuCharBefore('ಕರ್ನಕ', 4, convertKannadaToASCII);
+    TestRunner.assert(
+        knfBack.text === 'ಕರ್ನ' && knfBack.caret === 4,
+        'Backspace at end of ಕರ್ನಕ keeps caret at end of ಕರ್ನ (no knf→krAan regression)',
+        JSON.stringify(knfBack)
+    );
+    const knfa = L.setSignAt(knfBack.text, knfBack.caret, 'ಾ');
+    TestRunner.assert(
+        convertKannadaToASCII(knfa.text) === 'knfa',
+        'Adding ಾ after backspace on ಕರ್ನಕ produces ಕರ್ನಾ (knfa)',
+        `${knfa.text} → ${convertKannadaToASCII(knfa.text)}`
+    );
+
+    const noOrphanZwj = L.deleteBaravuCharBefore('ಕೆ' + ZWJ + 'ಕ', 1, convertKannadaToASCII);
+    TestRunner.assert(
+        noOrphanZwj.text === 'ಕಕ' && !noOrphanZwj.text.includes(ZWJ),
+        'Backspace on Tulu-only vowel leaves no stray ZWJ',
+        JSON.stringify(noOrphanZwj)
+    );
+
+    const rangeDel = L.deleteBaravuRange('ಕನ್ನಡ ಪದ', 0, 5, convertKannadaToASCII);
+    TestRunner.assert(
+        rangeDel.text === ' ಪದ' && rangeDel.caret === 0,
+        'Range deletion removes selected Baravu word',
+        JSON.stringify(rangeDel)
     );
 }
 
@@ -309,24 +362,21 @@ function testBaravuCaretMapping() {
         `${baravuLen} vs ${conjunct.length}`
     );
 
-    // Simulate mapping used by the keyboard: caret at end of Baravu display must append in Kannada.
-    function kannadaIndexAtBaravuEnd(kannada, offset) {
-        if (offset <= 0) return 0;
-        const full = convertKannadaToASCII(kannada);
-        if (offset >= full.length) return kannada.length;
-        for (let i = 1; i < kannada.length; i++) {
-            if (convertKannadaToASCII(kannada.slice(0, i)).length >= offset) return i;
-        }
-        return kannada.length;
-    }
-
     let t = conjunct;
-    const at = kannadaIndexAtBaravuEnd(t, baravuLen);
+    const at = L.baravuOffsetToKannadaIndex(t, baravuLen, convertKannadaToASCII);
     TestRunner.assert(
         at === t.length,
         'Caret at end of Baravu maps to end of Kannada (not knf→kranqk bug)',
         `offset ${baravuLen}, mapped ${at}, kannada length ${t.length}`
     );
+
+    const midSentence = L.baravuOffsetToKannadaIndex('ಕರ್ನ ಟ', 3, convertKannadaToASCII);
+    TestRunner.assert(
+        midSentence === 4,
+        'Caret at end of first word ಕರ್ನ inside a sentence maps to end of ಕರ್ನ',
+        `mapped ${midSentence}, expected 4`
+    );
+
     t = L.addTextAt(t, at, 'ಾ').text;
     t = L.addTextAt(t, t.length, 'ಟ').text;
     t = L.setSignAt(t, t.length, 'ಾ').text;
@@ -342,6 +392,7 @@ function testBaravuCaretMapping() {
 function runAllTests() {
     testTapSequences();
     testInsertAtCaret();
+    testDeleteBaravuCharBefore();
     testDeleteBeforeIndex();
     testBaravuCaretMapping();
     testVowelRow();

@@ -164,6 +164,7 @@
             this._kannada = '';
             this._pendingCaretKannada = null;
             this._caretKannada = 0;
+            this._caretRaf = null;
             this._page = 'letters';
             this._ready = false;
             this._width = 0;
@@ -222,6 +223,10 @@
 
         disconnectedCallback() {
             this._resizeObserver.disconnect();
+            if (this._caretRaf != null) {
+                cancelAnimationFrame(this._caretRaf);
+                this._caretRaf = null;
+            }
             this._detachTargetListeners();
         }
 
@@ -382,6 +387,10 @@
                 this._hideCaretMarker();
                 return;
             }
+            if (this._target.selectionStart !== this._target.selectionEnd) {
+                this._hideCaretMarker();
+                return;
+            }
             const index = this._target.selectionStart;
             const pos = this._measureTargetCaret(this._target, index);
             if (!pos) return;
@@ -392,18 +401,50 @@
         }
 
         _baravuOffsetToKannadaIndex(kannada, offset) {
-            if (offset <= 0) return 0;
-            const fullBaravu = convertKannadaToASCII(kannada);
-            // Baravu length can be shorter than Kannada (e.g. knf for ಕರ್ನ); caret at end of display = append.
-            if (offset >= fullBaravu.length) return kannada.length;
-            for (let i = 1; i < kannada.length; i++) {
-                if (convertKannadaToASCII(kannada.slice(0, i)).length >= offset) return i;
-            }
-            return kannada.length;
+            return TuluKeyboardLogic.baravuOffsetToKannadaIndex(kannada, offset, convertKannadaToASCII);
         }
 
         _kannadaIndexToBaravuOffset(kannada, index) {
             return convertKannadaToASCII(kannada.slice(0, index)).length;
+        }
+
+        _targetSelectionRange() {
+            if (this._target && document.activeElement === this._target &&
+                'selectionStart' in this._target &&
+                this._target.selectionEnd > this._target.selectionStart) {
+                return { start: this._target.selectionStart, end: this._target.selectionEnd };
+            }
+            return null;
+        }
+
+        _baravuCaretOffset() {
+            if (this._target && document.activeElement === this._target && 'selectionStart' in this._target) {
+                return this._target.selectionStart;
+            }
+            const k = typeof this._caretKannada === 'number' ? this._caretKannada : this._kannada.length;
+            return this._kannadaIndexToBaravuOffset(this._kannada, k);
+        }
+
+        _addEdit(text, addition) {
+            const L = TuluKeyboardLogic;
+            const range = this._targetSelectionRange();
+            if (range) {
+                const cleared = L.deleteBaravuRange(text, range.start, range.end, convertKannadaToASCII);
+                return L.addTextAt(cleared.text, cleared.caret, addition);
+            }
+            return L.addTextAt(text, this._activeKannadaCaret(), addition);
+        }
+
+        _backspaceEdit(text) {
+            const L = TuluKeyboardLogic;
+            const range = this._targetSelectionRange();
+            if (range) {
+                return L.deleteBaravuRange(text, range.start, range.end, convertKannadaToASCII);
+            }
+            if (this._target) {
+                return L.deleteBaravuCharBefore(text, this._baravuCaretOffset(), convertKannadaToASCII);
+            }
+            return L.deleteBeforeIndex(text, this._activeKannadaCaret());
         }
 
         _activeKannadaCaret() {
@@ -421,8 +462,21 @@
         _restoreTargetCaret(offset, atEnd) {
             if (!this._target) return;
             const el = this._target;
-            const apply = () => {
-                el.focus({ preventScroll: !atEnd });
+            if (this._caretRaf != null) {
+                cancelAnimationFrame(this._caretRaf);
+                this._caretRaf = null;
+            }
+            // Set selection synchronously so rapid taps/backspaces read the updated caret.
+            try {
+                el.setSelectionRange(offset, offset);
+            } catch {
+                /* unsupported */
+            }
+            if (atEnd) el.scrollTop = el.scrollHeight;
+            this._updateCaretMarker();
+            this._caretRaf = requestAnimationFrame(() => {
+                this._caretRaf = null;
+                if (document.activeElement !== el) el.focus({ preventScroll: !atEnd });
                 try {
                     el.setSelectionRange(offset, offset);
                 } catch {
@@ -430,8 +484,7 @@
                 }
                 if (atEnd) el.scrollTop = el.scrollHeight;
                 this._updateCaretMarker();
-            };
-            requestAnimationFrame(() => requestAnimationFrame(apply));
+            });
         }
 
         _onTargetCaret() {
@@ -470,10 +523,10 @@
             const { action, value } = button.dataset;
             const L = TuluKeyboardLogic;
             switch (action) {
-                case 'add': this._edit(text => L.addTextAt(text, this._activeKannadaCaret(), value)); break;
+                case 'add': this._edit(text => this._addEdit(text, value)); break;
                 case 'sign': this._edit(text => L.setSignAt(text, this._activeKannadaCaret(), value)); break;
                 case 'backspace':
-                    this._edit(text => L.deleteBeforeIndex(text, this._activeKannadaCaret()));
+                    this._edit(text => this._backspaceEdit(text));
                     break;
                 case 'page':
                     this._page = this._page === 'letters' ? 'numbers' : 'letters';
@@ -494,25 +547,24 @@
 
         _onKeydown(event) {
             const nav = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'];
-            if (event.target === this._target) {
-                if (nav.includes(event.key)) {
-                    queueMicrotask(() => this._onTargetCaret());
-                    return;
-                }
-                if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
-                    event.preventDefault();
-                    return;
-                }
+            if (event.target === this._target && nav.includes(event.key)) {
+                queueMicrotask(() => this._onTargetCaret());
+                return;
             }
             if (event.ctrlKey || event.metaKey || event.altKey) return;
             const edits = {
-                Backspace: text => TuluKeyboardLogic.deleteBeforeIndex(text, this._activeKannadaCaret()),
-                ' ': text => TuluKeyboardLogic.addTextAt(text, this._activeKannadaCaret(), ' '),
-                Enter: text => TuluKeyboardLogic.addTextAt(text, this._activeKannadaCaret(), '\n')
+                Backspace: text => this._backspaceEdit(text),
+                ' ': text => this._addEdit(text, ' '),
+                Enter: text => this._addEdit(text, '\n')
             };
-            if (!edits[event.key]) return;
-            event.preventDefault();
-            this._edit(edits[event.key]);
+            if (edits[event.key]) {
+                event.preventDefault();
+                this._edit(edits[event.key]);
+                return;
+            }
+            if (event.target === this._target && event.key.length === 1) {
+                event.preventDefault();
+            }
         }
 
         _render() {
